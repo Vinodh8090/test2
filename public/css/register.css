@@ -1,0 +1,364 @@
+body {font-family: 'Roboto', sans-serif!important;}
+.form-wd{width: 50%;margin: 0 auto;}
+.login input[type=text], .login input[type=email], .login input[type=password]{
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    border-radius: 5px;
+    background: #fff;
+    font-size: 26px;
+    color: #000;
+    padding: 8px 15px;
+    border: 2px solid #c0c0c0;
+    -webkit-box-shadow: inset 1px 1px 27px 0px rgba(0, 0, 0, 0.26);
+    -moz-box-shadow: inset 1px 1px 27px 0px rgba(0, 0, 0, 0.26);
+    box-shadow: inset 1px 1px 27px 0px rgba(0, 0, 0, 0.26);
+    margin: 0;
+}
+.login button {
+    background: #000;
+    color: #fff;
+    border-radius: 50px;
+    padding: 15px 35px;
+    font-size: 30px;
+    line-height: 30px;
+    text-shadow: none;
+    border: 0;
+    width: 100%;
+}
+.login button:hover {
+    background: #333!important;
+}
+.join-opt{margin-top: 25px;}
+.join-opt a{
+	display: block;
+	text-align: center;
+	border-radius: 100px;
+	padding: 10px;
+	font-size: 24px;
+	color: #fff;
+	background: #1da1f2;
+	margin: 10px 0;
+	transition: all 0.4s;
+	opacity: .9;
+}
+.join-opt a:hover{
+	transform: scale(1.02);
+	opacity: 1;
+}
+.join-opt a:nth-child(2){background: #4285f4;}
+.join-opt a:nth-child(3){background: #006db8;}
+.join-opt a:nth-child(4){background: #6441a5;}
+.join-opt a i{
+	margin-right: 10px;
+}
+.join-opt a i.twtrx-icon{
+	display: inline-block;
+	vertical-align:middle;
+	width: 20px;
+	height: 20px;
+	background: url(../../img/twitterX.png) no-repeat;
+	background-size: 100%;
+	filter: invert(100%);
+	margin-top: -3px;
+}
+
+
+
+.register-otp-div hr {
+	width:100%;
+	border: 0!important;
+	height: 1px!important;
+	margin: 30px auto 20px!important;
+	background: rgba(0,0,0,0);
+	background: -moz-linear-gradient(left, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 35%, rgba(0,0,0,0.7) 65%, rgba(0,0,0,0) 100%);
+	background: -webkit-gradient(left top, right top, color-stop(0%, rgba(0,0,0,0)), color-stop(35%, rgba(0,0,0,0.7)), color-stop(65%, rgba(0,0,0,0.7)), color-stop(100%, rgba(0,0,0,0)));
+	background: -webkit-linear-gradient(left, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 35%, rgba(0,0,0,0.7) 65%, rgba(0,0,0,0) 100%);
+	background: -o-linear-gradient(left, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 35%, rgba(0,0,0,0.7) 65%, rgba(0,0,0,0) 100%);
+	background: -ms-linear-gradient(left, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 35%, rgba(0,0,0,0.7) 65%, rgba(0,0,0,0) 100%);
+	background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 35%, rgba(0,0,0,0.7) 65%, rgba(0,0,0,0) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#000000', endColorstr='#000000', GradientType=1 );
+}
+
+.wya{
+	font-size: 22px;
+	line-height: 28px;
+	margin-bottom: 15px;
+}
+.sfrmttl{
+	display: inline-block;
+	vertical-align: top;
+	font-size: 36px;
+	margin: -4px 0 0 10px;
+	color: #000;
+}
+.tabbtn{
+    margin: 0 -5px 30px;
+    font-size: 0;
+}
+.tabbtn a{
+	position: relative;
+	display: inline-block;
+	width: calc(50% - 10px);
+	border-radius: 10px;
+	font-size: 22px;
+	line-height: 22px;
+	padding: 10px 30px 12px 80px;
+	color: #fff;
+	background: #333;
+	margin:5px 5px 0;
+	text-align: center;
+ }
+ .tabbtn a.active,  .tabbtn a:hover{
+	background: rgb(167, 6, 103);
+ }
+.tabbtn a small{
+	display: block;
+	font-size: 18px;
+}
+.tabbtn a i{
+	position: absolute;
+	top: 15px;
+	left: 25px;
+	font-size: 36px;
+	color: #fff;
+}
+.tabbtn a.lst i{left: 30px}
+.tabbtn a img{
+	top: 10px;
+	left: 18px;
+	filter: invert(100%);
+	width: 50px;
+	height: auto;
+}
+.bgglobe{
+    background: #000;
+    color: #fff;
+	text-align: center;
+	padding: 30px 0!important;
+	font-size: 0;
+}
+.bgglobe:before{
+    display: inline-block;
+	vertical-align: middle;
+	content: '';
+	width: 0;
+	height: 100%;
+}
+.tabcnt, .hlpr-cont{
+    display: inline-block;
+	vertical-align: middle;
+    width: 100%;
+    margin: 0 auto;
+}
+.tabcnt.active{
+	display: inline-block;
+}
+.subttl{
+	font-size:36px;
+	line-height: 44px;
+	text-align: center;
+	margin:0 10% 10px;
+
+}
+.bgglobe p{
+	width: 700px;
+    font-size: 22px;
+	line-height: 30px;
+	text-align: center;
+	margin: 0 auto;
+}
+ul.adv-list{
+	width: 600px;
+	margin: 40px auto 0;
+	text-align: left;
+	padding: 20px;
+	border-radius: 20px;
+    list-style: none;
+}
+.adv-list li{
+	position: relative;
+	font-size: 22px;
+	padding: 1px 5px 1px 25px;
+}
+.adv-list li:before{
+	position: absolute;
+	top: 5px;
+	left: 0;
+	content:"\f058";
+	font-family:'FontAwesome';
+	font-size: 18px;
+	color: rgb(244, 28, 151);
+}
+/* .join-vid{
+	width: 600px;
+	margin: 30px auto 0;
+}
+.join-vid img{
+	max-width: 100%;
+	height: auto;
+} */
+.join-vid{
+	position: relative;
+	width: calc(100% - 1px);
+	margin-top: 30px;
+}
+.vmplyr{
+	padding: 56.25% 0 0;
+	position: relative;
+}
+.vmplyr iframe{
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+}
+
+.rsDefault .rsBullets {bottom: -30px;background: transparent;}
+.rsDefault .rsBullet {padding: 0 5px;width: 18px;height: 12px;}
+.rsDefault .rsBullet span {width: 12px;height: 12px;}
+
+.form-group div{position: relative;}
+.showpass{
+	position: absolute;
+	top: 6px;
+	right: 15px;
+	width: auto!important;
+	margin: 0!important;
+	text-align: left!important;
+}
+.showpass input{
+	position: absolute;
+	top: 0;
+	left: 0;
+	opacity: 0;
+}
+.showpass small{
+	position: relative;
+	font-size: 30px;
+	color: #000;
+	cursor: pointer;
+}
+.showpass small:before{
+	display: inline-block;
+	content:"\f070";
+	font-family:'FontAwesome';	
+}
+.showpass input:checked ~ small:before{
+	content:"\f06e";
+}
+.npl{padding-left: 0!important;}
+.agree-term input[type="checkbox"] {
+	display:none;
+}
+.agree-term input[type="checkbox"] + label{
+	position: relative;
+	line-height: 18px;
+	margin:5px 0;
+	cursor:pointer;
+	text-align: left;
+	padding-left:50px;
+	font-size: 16px;
+}
+.agree-term input[type="checkbox"] + label:before  {
+	position: absolute;
+	top: 0;
+	left: 0;
+	display:inline-block;
+	width:35px;
+	height:35px;
+	overflow:hidden;
+	vertical-align:middle;
+	background:url(../../img/check-form.png) 0 0 no-repeat;
+	background-size: 35px;
+	border: 0;
+}
+.agree-term input[type="checkbox"]:checked + label:before  {background:url(../../img/check-form.png) 0 -35px no-repeat;background-size: 35px}
+
+
+.login.h-151{min-height: calc(100vh - 201px)!important;}
+.cftr{
+	display: block;
+	width: 100%;
+	background: #333;
+	padding: 30px 20px;
+	text-align: center;
+	color: #fff;
+	margin-top: 50px;
+}
+.cftr p {
+	display: block;
+	margin: 0 0 15px;
+	padding: 0;
+	color: #fff;
+	font-size: 14px;
+	line-height: 20px;
+}
+.cftr p a{
+	text-decoration: underline!important;
+	color: #fff!important;
+}
+.cftr p a:hover{text-decoration: none!important}
+.cftr span a{
+	display: inline-block;
+	padding: 3px 10px;
+	color: #000!important;
+	border-radius: 30px;
+	font-size: 14px;
+	background: #fff;
+	margin: 3px;
+	opacity: .7;
+	transition: all 0.3s;
+}
+.cftr span a:hover{
+	opacity: 1;
+	transform: scale(1.07);
+}
+.cftr span a img{
+	width: 24px;
+	height: auto;
+}
+.cftr span br{display: none}
+
+@media screen and (max-width:1580px) {
+	/* .join-vid{width: 90%;} */
+	.form-wd{width: 70%;}
+	.join-vid{width: 100%;}
+	.subttl{width: 90%;margin: 0 auto 10px;}
+}
+@media screen and (max-width:1180px) {
+	.form-wd{width: 90%;}
+	.royalSlider, ul.adv-list{width: 100%;}
+	.bgglobe p{font-size: 18px;line-height: 26px;}
+	.adv-list li{font-size: 18px;}
+	.adv-list li:before{font-size: 16px;top: 2px;}
+	.agree-term input[type="checkbox"] + label{font-size: 14px;}
+	
+}
+@media screen and (max-width:980px) {
+	.form-wd{width: 96%;}
+	.sfrmttl{font-size: 30px;margin-top: 0;}
+	.wya{font-size: 18px;line-height: 26px;}
+	.agree-term input[type="checkbox"] + label span br{display: none;}
+	.login input[type=text], .login input[type=email], .login input[type=password]{font-size: 18px;}
+	.showpass{top: -1px;}
+	.login button{font-size: 24px;}
+}
+@media screen and (max-width:680px) {
+	body{padding-bottom: 0!important;}
+	.bgglobe{padding: 40px 0!important;}
+	.subttl{font-size: 6.5vw;line-height: 8vw;}
+	.bgglobe p{margin: 10px 15px;font-size: 5vw;}
+	.form-wd{width: 100%;}
+	.login button, .join-opt a{font-size: 20px;}
+	.join-opt a i.twtrx-icon{width: 18px;height: 18px;}
+	.cftr span a{margin: 5px 2px;}
+
+}
+@media screen and (max-width:330px) {
+	.brand-logo{width: 180px;}
+	.sfrmttl{font-size: 24px;margin-top: 4px;}
+	.wya {font-size: 16px;line-height: 18px;}
+	
+}

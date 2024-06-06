@@ -1,0 +1,230 @@
+.big-ttl{
+	position: relative;
+	font-size: 24px;
+	color:#000;
+	text-align: center;
+	padding-bottom: 15px;
+	border-bottom: 1px dashed #999;
+	margin: 0 20px;
+}
+.bc-top{
+	position: relative;
+	margin: 30px 20px 5px;
+}
+.bc-top h4{
+	display: inline-block;
+	font-size: 24px;
+	margin-top: 2px;
+}
+.value-slt{
+	position: absolute;
+	display: inline-block;
+	top: -10px;
+	right: 15px;
+}
+.value-slt h5{
+	display: inline-block;
+	vertical-align: top;
+	font-size: 18px;
+	margin:10px 10px 0 0;
+}
+.dedrp{
+	position: relative;
+	overflow: hidden;
+	display: inline-block;
+	vertical-align: middle;
+	font-size: 18px;
+	color: #000;
+	width: 130px;
+	background: #fff;
+	border-radius: 5px;
+	margin-bottom: 15px;
+	border: 1px solid #eee;
+}
+.dedrp select {
+	appearance: none;
+	outline: 0;
+	border: 0;
+	box-shadow: none;
+	padding: 7px 56px 7px 14px;
+	color: #000;
+	background-color: #fff;
+	background-image: none;
+	cursor: pointer;
+	width: 105%;
+}
+.dedrp select::-ms-expand {display: none;}
+.dedrp::after, .drop-icon span::after {
+	font-family: 'FontAwesome';
+	content:"\f0d7";
+	font-weight: 700;
+	position: absolute;
+	top: 0;
+	right: 0;
+	padding: .50em 1em;
+	transition: .25s all ease;
+	pointer-events: none;
+	color: #fff;
+	background: #f41c97;
+	background: -moz-linear-gradient(top, #f41c97 0%, var(--drkpnk) 100%);
+	background: -webkit-gradient(left top, left bottom, color-stop(0%, #f41c97), color-stop(100%, var(--drkpnk)));
+	background: -webkit-linear-gradient(top, #f41c97 0%, var(--drkpnk) 100%);
+	background: -o-linear-gradient(top, #f41c97 0%, var(--drkpnk) 100%);
+	background: -ms-linear-gradient(top, #f41c97 0%, var(--drkpnk) 100%);
+	background: linear-gradient(to bottom, #f41c97 0%, var(--drkpnk) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f41c97', endColorstr='var(--drkpnk)', GradientType=0 );
+}
+.dedrp:hover::after {color: #dbf1fe;}
+.ebc-opt{
+	position: relative;
+	margin-bottom: 20px;
+	display: flex;
+	align-items: stretch;
+	flex-wrap: wrap;
+    justify-content: center;
+}
+.ebc-opt input[type="radio"] {
+	opacity: 0;
+	position: absolute;
+	width: 0; 
+}
+.ebc-opt input[type="radio"]:checked + .ebc-box {
+	background: #702a54;
+	background: -moz-linear-gradient(top, #702a54 0%, #5c1d43 100%);
+	background: -webkit-gradient(left top, left bottom, color-stop(0%, #702a54), color-stop(100%, #5c1d43));
+	background: -webkit-linear-gradient(top, #702a54 0%, #5c1d43 100%);
+	background: -o-linear-gradient(top, #702a54 0%, #5c1d43 100%);
+	background: -ms-linear-gradient(top, #702a54 0%, #5c1d43 100%);
+	background: linear-gradient(to bottom, #702a54 0%, #5c1d43 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#702a54', endColorstr='#5c1d43', GradientType=0 );
+	color: #fff;
+}
+.ebc-opt input[type="radio"]:checked + .ebc-box .ebc-inn h3, .ebc-opt input[type="radio"]:checked + .ebc-box .ebc-inn h4{color: #fff;}
+.ebc-box{
+	display:inline-block;
+	width: calc(24% - 31px);
+	margin: 20px 15px;
+	border-radius: 10px;
+	background: #000;
+	padding: 10px 15px 20px;
+	transition: all 0.4s;
+	cursor: pointer;
+	text-align: center;
+	color: #fff;
+}
+.ebc-box:hover{
+	transform: scale(1.1);
+	background: #333;
+}
+.ebc-box span{border: 1px solid color:#f41c97;}
+.ebc-box span:hover{color:#fff;}
+.ebc-box hr{
+	width: 100%;
+	border: 0;
+	border-bottom: 1px dashed #666;
+}
+.ebc-inn{
+	vertical-align: top;
+	flex: 1 1 auto;
+}
+.ebc-inn h3{
+	font-size: 48px;
+	font-weight: 700;
+	color:#f41c97;
+}
+.ebc-inn h4{
+	font-size: 22px;
+	margin-bottom: 5px;
+}
+.ebc-inn p{
+	font-size: 24px;
+	font-weight: 700;
+	margin-bottom: 0;
+}
+.ebc-inn span{
+	display: inline-block;
+	background: #f00;
+	font-size: 18px;
+	border-radius: 100px;
+	padding: 2px 15px;
+	color: #fff;
+}
+.pay-opt{
+	text-align: center;
+	margin-top: 30px;
+	display: flex;
+	align-items: stretch;
+	flex-wrap: wrap;
+    justify-content: center;
+}
+.paym-ebox, .pop-box{
+	position: relative;
+	display: inline-block;
+	width: calc(24% - 21px);
+	vertical-align: top;
+	margin: 20px 10px;
+	border-radius: 30px;
+	background: #000;
+	padding: 30px 20px;
+	text-align: center;
+	color: #fff;
+	transition: all 0.4s;
+}
+.paym-ebox:hover, .pop-box:hover{
+	transform: scale(1.05);
+	background: #333;
+}
+.paym-ebox{overflow: hidden;}
+.coming-soon{
+	position: absolute;
+	width: 150px;
+	height: 150px;
+	background: url(../../img/coming-soon.png);
+	background-size: 100%;
+	right: 0;
+	bottom: 0;
+}
+.paym-ebox span{
+	display: inline-block;
+	vertical-align: middle;
+	width: 45%;
+	margin-bottom: 10px;
+}
+.paym-ebox span img{
+    max-width: 100%;
+    height: auto;
+}
+.paym-ebox hr{
+	border: 0;
+	border-bottom: 1px dashed #fff;
+	margin: 20px 0;
+}
+.paym-ebox p{
+	font-size: 18px;
+	margin:0 0 15px;
+}
+.paym-ebox a.pnk-btn{
+	font-size: 18px;
+	margin-top: 10px;
+}
+.pmr{
+	display: inline-block;
+	vertical-align: middle;
+	width: 100%;
+}
+.pmr h3{
+	font-size: 30px;
+	font-weight: 700;
+	margin-bottom: 10px;
+}
+.pmr h4{
+	font-size: 22px;
+	margin-bottom: 0;
+}
+.pmr p{margin-bottom: 0!important;}
+.lcmc{
+	text-align: center;
+	margin: 20px 0 0;
+	color: #fff;
+	font-size: 24px;
+}
