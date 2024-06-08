@@ -46,6 +46,7 @@
 <div class="main-txt"><div class="inner"><h3>You need an invitation from a registered FANCCI Model, Agency or Affiliate, to join the FANCCI network. Please ask the person who have invited you to FANCCI to share a link with you.</h3><hr></div></div>
 
 
+<div class="prize-ttl"><h3>Featured Models</h3></div>
 
    
 @stop

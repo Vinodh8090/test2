@@ -1,6 +1,7 @@
 {
-    "/css/theme/bootstrap.css": "/css/theme/bootstrap.css",
-    "/css/theme/bootstrap.rtl.css": "/css/theme/bootstrap.rtl.css",
+    "/js/app.js": "/js/app.js",
+    "/css/theme/bootstrap.rtl.dark.css": "/css/theme/bootstrap.rtl.dark.css",
     "/css/theme/bootstrap.dark.css": "/css/theme/bootstrap.dark.css",
-    "/css/theme/bootstrap.rtl.dark.css": "/css/theme/bootstrap.rtl.dark.css"
+    "/css/theme/bootstrap.rtl.css": "/css/theme/bootstrap.rtl.css",
+    "/css/theme/bootstrap.css": "/css/theme/bootstrap.css"
 }

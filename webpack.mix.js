@@ -1,5 +1,5 @@
-const mix = require('laravel-mix');
-require('laravel-mix-purgecss');
+const mix = require("laravel-mix");
+require("laravel-mix-purgecss");
 
 /*
  |--------------------------------------------------------------------------
@@ -12,18 +12,20 @@ require('laravel-mix-purgecss');
  |
  */
 
-let outputPath = 'public/css/theme';
-if(typeof process.env.npm_config_outputPath !== 'undefined'){
-    outputPath = process.env.npm_config_outputPath;
+let outputPath = "public/css/theme";
+if (typeof process.env.npm_config_outputPath !== "undefined") {
+  outputPath = process.env.npm_config_outputPath;
 }
 
-let resourcesPath = 'resources/sass/';
-if(typeof process.env.npm_config_resourcePath !== 'undefined'){
-    resourcesPath = process.env.npm_config_resourcePath;
+let resourcesPath = "resources/sass/";
+if (typeof process.env.npm_config_resourcePath !== "undefined") {
+  resourcesPath = process.env.npm_config_resourcePath;
 }
 
 mix
-    .sass(resourcesPath+'/bootstrap.scss', outputPath)
-    .sass(resourcesPath+'/bootstrap.rtl.scss', outputPath)
-    .sass(resourcesPath+'/bootstrap.dark.scss', outputPath)
-    .sass(resourcesPath+'/bootstrap.rtl.dark.scss', outputPath);
+  .js("resources/js/app.js", "public/js")
+  .vue()
+  .sass(resourcesPath + "/bootstrap.scss", outputPath)
+  .sass(resourcesPath + "/bootstrap.rtl.scss", outputPath)
+  .sass(resourcesPath + "/bootstrap.dark.scss", outputPath)
+  .sass(resourcesPath + "/bootstrap.rtl.dark.scss", outputPath);

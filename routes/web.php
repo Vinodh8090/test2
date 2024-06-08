@@ -12,6 +12,11 @@
 */
 
 // Admin routes ( Needs to be placed above )
+
+use App\User;
+use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Request;
+
 Route::group(['prefix' => 'admin', 'middleware' => 'jsVars'], function () {
     Voyager::routes();
     Route::get('/metrics/new/users/value', 'MetricsController@newUsersValue')->name('admin.metrics.new.users.value');
@@ -41,6 +46,17 @@ Route::get('/buy-credits', ['uses' => 'GenericController@buycredits', 'as'   => 
 
 // Language switcher route
 Route::get('language/{locale}', ['uses' => 'GenericController@setLanguage', 'as'   => 'language']);
+
+// video chat routes
+Route::get('/video-chat', function () {
+    // fetch all users apart from the authenticated user
+    $users = User::where('id', '<>', Auth::id())->get();
+    return view('video-chat', ['users' => $users]);
+});
+
+// Endpoints to call or receive calls.
+Route::post('/video/call-user', 'App\Http\Controllers\VideoChatController@callUser');
+Route::post('/video/accept-call', 'App\Http\Controllers\VideoChatController@acceptCall');
 
 /* Auth Routes + Verify password */
 Auth::routes(['verify'=>true]);
