@@ -31,6 +31,10 @@ Vue.component("video-chat", require("./components/VideoChat.vue").default);
 
 // Uncomment the following line if AgoraChat component is needed
 // Vue.component("agora-chat", require("./components/AgoraChat.vue").default);
+Vue.component(
+  "video-chat-test",
+  require("./components/VideoChatTest.vue").default
+);
 
 // Streaming Components
 // Ensure consistent casing in imports

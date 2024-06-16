@@ -54,6 +54,11 @@ Route::get('/video-chat', function () {
     return view('video-chat', ['users' => $users]);
 });
 
+
+Route::get('/video-chat-test', function () {
+    return view('video-chat-test');
+});
+
 // Endpoints to call or receive calls.
 Route::post('/video/call-user', 'App\Http\Controllers\VideoChatController@callUser');
 Route::post('/video/accept-call', 'App\Http\Controllers\VideoChatController@acceptCall');
