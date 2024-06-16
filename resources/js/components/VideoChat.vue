@@ -130,58 +130,36 @@ export default {
       },
     };
   },
-
   mounted() {
-    this.initializeChannel(); // this initializes laravel echo
-    this.initializeCallListeners(); // subscribes to video presence channel and listens to video events
+    this.initializeChannel(); // Initializes Laravel Echo
+    this.initializeCallListeners(); // Subscribes to video presence channel and listens to video events
   },
   computed: {
     incomingCallDialog() {
-      if (
+      return (
         this.videoCallParams.receivingCall &&
         this.videoCallParams.caller !== this.authuserid
-      ) {
-        return true;
-      }
-      return false;
+      );
     },
-
     callerDetails() {
       if (
         this.videoCallParams.caller &&
         this.videoCallParams.caller !== this.authuserid
       ) {
-        const incomingCaller = this.allusers.filter(
+        const incomingCaller = this.allusers.find(
           (user) => user.id === this.videoCallParams.caller
         );
-
-        return {
-          id: this.videoCallParams.caller,
-          name: `${incomingCaller[0].name}`,
-        };
+        return incomingCaller
+          ? { id: this.videoCallParams.caller, name: incomingCaller.name }
+          : null;
       }
       return null;
     },
   },
   methods: {
     initializeChannel() {
-      console.log("outside");
       this.videoCallParams.channel = window.Echo.join("presence-video-channel");
-      window.Echo.join(`presence-video-channel`)
-        .here((users) => {
-          console.log("Users currently in the channel:", users);
-        })
-        .joining((user) => {
-          console.log("User joined the channel:", user);
-        })
-        .leaving((user) => {
-          console.log("User left the channel:", user);
-        })
-        .listen("StartVideoChat", (e) => {
-          console.log("Event received:", e);
-        });
     },
-
     getMediaPermission() {
       return getPermissions()
         .then((stream) => {
@@ -191,21 +169,16 @@ export default {
           }
         })
         .catch((error) => {
-          console.log(error);
+          console.error(error);
         });
     },
-
     initializeCallListeners() {
       this.videoCallParams.channel.here((users) => {
         this.videoCallParams.users = users;
       });
 
       this.videoCallParams.channel.joining((user) => {
-        // check user availability
-        const joiningUserIndex = this.videoCallParams.users.findIndex(
-          (data) => data.id === user.id
-        );
-        if (joiningUserIndex < 0) {
+        if (!this.videoCallParams.users.some((data) => data.id === user.id)) {
           this.videoCallParams.users.push(user);
         }
       });
@@ -214,17 +187,18 @@ export default {
         const leavingUserIndex = this.videoCallParams.users.findIndex(
           (data) => data.id === user.id
         );
-        this.videoCallParams.users.splice(leavingUserIndex, 1);
+        if (leavingUserIndex >= 0) {
+          this.videoCallParams.users.splice(leavingUserIndex, 1);
+        }
       });
-      // listen to incomming call
+
+      // Listen to incoming call
       this.videoCallParams.channel.listen("StartVideoChat", ({ data }) => {
         if (data.type === "incomingCall") {
-          // add a new line to the sdp to take care of error
           const updatedSignal = {
             ...data.signalData,
             sdp: `${data.signalData.sdp}\n`,
           };
-
           this.videoCallParams.receivingCall = true;
           this.videoCallParams.caller = data.from;
           this.videoCallParams.callerSignal = updatedSignal;
@@ -251,7 +225,6 @@ export default {
       });
 
       this.videoCallParams.peer1.on("signal", (data) => {
-        // send user call signal
         axios
           .post("/video/call-user", {
             user_to_call: id,
@@ -260,12 +233,11 @@ export default {
           })
           .then((res) => console.log("res", res, this.authuserid))
           .catch((error) => {
-            console.log(error);
+            console.error(error);
           });
       });
 
       this.videoCallParams.peer1.on("stream", (stream) => {
-        console.log("call streaming");
         if (this.$refs.partnerVideo) {
           this.$refs.partnerVideo.srcObject = stream;
         }
@@ -276,7 +248,7 @@ export default {
       });
 
       this.videoCallParams.peer1.on("error", (err) => {
-        console.log(err);
+        console.error("peer connection error", err);
       });
 
       this.videoCallParams.peer1.on("close", () => {
@@ -285,21 +257,15 @@ export default {
 
       this.videoCallParams.channel.listen("StartVideoChat", ({ data }) => {
         if (data.type === "callAccepted") {
-          if (data.signal.renegotiate) {
-            console.log("renegotating");
-          }
-          if (data.signal.sdp) {
-            this.videoCallParams.callAccepted = true;
-            const updatedSignal = {
-              ...data.signal,
-              sdp: `${data.signal.sdp}\n`,
-            };
-            this.videoCallParams.peer1.signal(updatedSignal);
-          }
+          const updatedSignal = {
+            ...data.signal,
+            sdp: `${data.signal.sdp}\n`,
+          };
+          this.videoCallParams.callAccepted = true;
+          this.videoCallParams.peer1.signal(updatedSignal);
         }
       });
     },
-
     async acceptCall() {
       this.callPlaced = true;
       this.videoCallParams.callAccepted = true;
@@ -318,7 +284,9 @@ export default {
           ],
         },
       });
+
       this.videoCallParams.receivingCall = false;
+
       this.videoCallParams.peer2.on("signal", (data) => {
         axios
           .post("/video/accept-call", {
@@ -327,22 +295,20 @@ export default {
           })
           .then(() => {})
           .catch((error) => {
-            console.log(error);
+            console.error(error);
           });
       });
 
       this.videoCallParams.peer2.on("stream", (stream) => {
-        this.videoCallParams.callAccepted = true;
         this.$refs.partnerVideo.srcObject = stream;
       });
 
       this.videoCallParams.peer2.on("connect", () => {
-        console.log("peer connected");
-        this.videoCallParams.callAccepted = true;
+        console.log("peer2 connected");
       });
 
       this.videoCallParams.peer2.on("error", (err) => {
-        console.log(err);
+        console.error("err from peer2", err);
       });
 
       this.videoCallParams.peer2.on("close", () => {
@@ -357,59 +323,82 @@ export default {
       }
     },
     getUserOnlineStatus(id) {
-      const onlineUserIndex = this.videoCallParams.users.findIndex(
-        (data) => data.id === id
-      );
-      if (onlineUserIndex < 0) {
-        return "Offline";
-      }
-      return "Online";
+      return this.videoCallParams.users.some((data) => data.id === id)
+        ? "Online"
+        : "Offline";
     },
     declineCall() {
       this.videoCallParams.receivingCall = false;
     },
-
     toggleMuteAudio() {
-      if (this.mutedAudio) {
-        this.$refs.userVideo.srcObject.getAudioTracks()[0].enabled = true;
-        this.mutedAudio = false;
+      if (this.$refs.userVideo && this.$refs.userVideo.srcObject) {
+        const audioTracks = this.$refs.userVideo.srcObject.getAudioTracks();
+        if (audioTracks.length > 0) {
+          audioTracks[0].enabled = !this.mutedAudio;
+          this.mutedAudio = !this.mutedAudio;
+        } else {
+          console.warn("No audio tracks found");
+        }
       } else {
-        this.$refs.userVideo.srcObject.getAudioTracks()[0].enabled = false;
-        this.mutedAudio = true;
+        console.warn("User video stream is not available");
       }
     },
-
     toggleMuteVideo() {
-      if (this.mutedVideo) {
-        this.$refs.userVideo.srcObject.getVideoTracks()[0].enabled = true;
-        this.mutedVideo = false;
+      if (this.$refs.userVideo && this.$refs.userVideo.srcObject) {
+        const videoTracks = this.$refs.userVideo.srcObject.getVideoTracks();
+        if (videoTracks.length > 0) {
+          videoTracks[0].enabled = !this.mutedVideo;
+          this.mutedVideo = !this.mutedVideo;
+        } else {
+          console.warn("No video tracks found");
+        }
       } else {
-        this.$refs.userVideo.srcObject.getVideoTracks()[0].enabled = false;
-        this.mutedVideo = true;
+        console.warn("User video stream is not available");
       }
     },
-
     stopStreamedVideo(videoElem) {
-      const stream = videoElem.srcObject;
-      const tracks = stream.getTracks();
-      tracks.forEach((track) => {
-        track.stop();
-      });
-      videoElem.srcObject = null;
+      if (videoElem && videoElem.srcObject) {
+        const stream = videoElem.srcObject;
+        const tracks = stream.getTracks();
+        tracks.forEach((track) => {
+          track.stop();
+        });
+        videoElem.srcObject = null;
+      }
     },
     endCall() {
-      // if video or audio is muted, enable it so that the stopStreamedVideo method will work
       if (!this.mutedVideo) this.toggleMuteVideo();
       if (!this.mutedAudio) this.toggleMuteAudio();
-      this.stopStreamedVideo(this.$refs.userVideo);
-      if (this.authuserid === this.videoCallParams.caller) {
-        this.videoCallParams.peer1.destroy();
-      } else {
-        this.videoCallParams.peer2.destroy();
+
+      if (this.$refs.userVideo) {
+        this.stopStreamedVideo(this.$refs.userVideo);
       }
-      this.videoCallParams.channel.pusher.channels.channels[
-        "presence-video-channel"
-      ].disconnect();
+
+      if (this.authuserid === this.videoCallParams.caller) {
+        if (this.videoCallParams.peer1) {
+          this.videoCallParams.peer1.destroy();
+        } else {
+          console.warn("peer1 is null when trying to end call");
+        }
+      } else {
+        if (this.videoCallParams.peer2) {
+          this.videoCallParams.peer2.destroy();
+        } else {
+          console.warn("peer2 is null when trying to end call");
+        }
+      }
+
+      if (
+        this.videoCallParams.channel &&
+        this.videoCallParams.channel.pusher &&
+        this.videoCallParams.channel.pusher.channels
+      ) {
+        this.videoCallParams.channel.pusher.channels.channels[
+          "presence-video-channel"
+        ].disconnect();
+      } else {
+        console.warn("Unable to disconnect from presence-video-channel");
+      }
 
       setTimeout(() => {
         this.callPlaced = false;

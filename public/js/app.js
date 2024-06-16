@@ -199,43 +199,30 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     };
   },
   mounted: function mounted() {
-    this.initializeChannel(); // this initializes laravel echo
-    this.initializeCallListeners(); // subscribes to video presence channel and listens to video events
+    this.initializeChannel(); // Initializes Laravel Echo
+    this.initializeCallListeners(); // Subscribes to video presence channel and listens to video events
   },
   computed: {
     incomingCallDialog: function incomingCallDialog() {
-      if (this.videoCallParams.receivingCall && this.videoCallParams.caller !== this.authuserid) {
-        return true;
-      }
-      return false;
+      return this.videoCallParams.receivingCall && this.videoCallParams.caller !== this.authuserid;
     },
     callerDetails: function callerDetails() {
       var _this = this;
       if (this.videoCallParams.caller && this.videoCallParams.caller !== this.authuserid) {
-        var incomingCaller = this.allusers.filter(function (user) {
+        var incomingCaller = this.allusers.find(function (user) {
           return user.id === _this.videoCallParams.caller;
         });
-        return {
+        return incomingCaller ? {
           id: this.videoCallParams.caller,
-          name: "".concat(incomingCaller[0].name)
-        };
+          name: incomingCaller.name
+        } : null;
       }
       return null;
     }
   },
   methods: {
     initializeChannel: function initializeChannel() {
-      console.log("outside");
       this.videoCallParams.channel = window.Echo.join("presence-video-channel");
-      window.Echo.join("presence-video-channel").here(function (users) {
-        console.log("Users currently in the channel:", users);
-      }).joining(function (user) {
-        console.log("User joined the channel:", user);
-      }).leaving(function (user) {
-        console.log("User left the channel:", user);
-      }).listen("StartVideoChat", function (e) {
-        console.log("Event received:", e);
-      });
     },
     getMediaPermission: function getMediaPermission() {
       var _this2 = this;
@@ -245,7 +232,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
           _this2.$refs.userVideo.srcObject = stream;
         }
       })["catch"](function (error) {
-        console.log(error);
+        console.error(error);
       });
     },
     initializeCallListeners: function initializeCallListeners() {
@@ -254,11 +241,9 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         _this3.videoCallParams.users = users;
       });
       this.videoCallParams.channel.joining(function (user) {
-        // check user availability
-        var joiningUserIndex = _this3.videoCallParams.users.findIndex(function (data) {
+        if (!_this3.videoCallParams.users.some(function (data) {
           return data.id === user.id;
-        });
-        if (joiningUserIndex < 0) {
+        })) {
           _this3.videoCallParams.users.push(user);
         }
       });
@@ -266,13 +251,15 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         var leavingUserIndex = _this3.videoCallParams.users.findIndex(function (data) {
           return data.id === user.id;
         });
-        _this3.videoCallParams.users.splice(leavingUserIndex, 1);
+        if (leavingUserIndex >= 0) {
+          _this3.videoCallParams.users.splice(leavingUserIndex, 1);
+        }
       });
-      // listen to incomming call
+
+      // Listen to incoming call
       this.videoCallParams.channel.listen("StartVideoChat", function (_ref) {
         var data = _ref.data;
         if (data.type === "incomingCall") {
-          // add a new line to the sdp to take care of error
           var updatedSignal = _objectSpread(_objectSpread({}, data.signalData), {}, {
             sdp: "".concat(data.signalData.sdp, "\n")
           });
@@ -307,7 +294,6 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
                   }
                 });
                 _this4.videoCallParams.peer1.on("signal", function (data) {
-                  // send user call signal
                   axios.post("/video/call-user", {
                     user_to_call: id,
                     signal_data: data,
@@ -315,11 +301,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
                   }).then(function (res) {
                     return console.log("res", res, _this4.authuserid);
                   })["catch"](function (error) {
-                    console.log(error);
+                    console.error(error);
                   });
                 });
                 _this4.videoCallParams.peer1.on("stream", function (stream) {
-                  console.log("call streaming");
                   if (_this4.$refs.partnerVideo) {
                     _this4.$refs.partnerVideo.srcObject = stream;
                   }
@@ -328,7 +313,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
                   console.log("peer connected");
                 });
                 _this4.videoCallParams.peer1.on("error", function (err) {
-                  console.log(err);
+                  console.error("peer connection error", err);
                 });
                 _this4.videoCallParams.peer1.on("close", function () {
                   console.log("call closed caller");
@@ -336,16 +321,11 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
                 _this4.videoCallParams.channel.listen("StartVideoChat", function (_ref2) {
                   var data = _ref2.data;
                   if (data.type === "callAccepted") {
-                    if (data.signal.renegotiate) {
-                      console.log("renegotating");
-                    }
-                    if (data.signal.sdp) {
-                      _this4.videoCallParams.callAccepted = true;
-                      var updatedSignal = _objectSpread(_objectSpread({}, data.signal), {}, {
-                        sdp: "".concat(data.signal.sdp, "\n")
-                      });
-                      _this4.videoCallParams.peer1.signal(updatedSignal);
-                    }
+                    var updatedSignal = _objectSpread(_objectSpread({}, data.signal), {}, {
+                      sdp: "".concat(data.signal.sdp, "\n")
+                    });
+                    _this4.videoCallParams.callAccepted = true;
+                    _this4.videoCallParams.peer1.signal(updatedSignal);
                   }
                 });
               case 11:
@@ -386,19 +366,17 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
                     signal: data,
                     to: _this5.videoCallParams.caller
                   }).then(function () {})["catch"](function (error) {
-                    console.log(error);
+                    console.error(error);
                   });
                 });
                 _this5.videoCallParams.peer2.on("stream", function (stream) {
-                  _this5.videoCallParams.callAccepted = true;
                   _this5.$refs.partnerVideo.srcObject = stream;
                 });
                 _this5.videoCallParams.peer2.on("connect", function () {
-                  console.log("peer connected");
-                  _this5.videoCallParams.callAccepted = true;
+                  console.log("peer2 connected");
                 });
                 _this5.videoCallParams.peer2.on("error", function (err) {
-                  console.log(err);
+                  console.error("err from peer2", err);
                 });
                 _this5.videoCallParams.peer2.on("close", function () {
                   console.log("call closed accepter");
@@ -418,55 +396,74 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       }
     },
     getUserOnlineStatus: function getUserOnlineStatus(id) {
-      var onlineUserIndex = this.videoCallParams.users.findIndex(function (data) {
+      return this.videoCallParams.users.some(function (data) {
         return data.id === id;
-      });
-      if (onlineUserIndex < 0) {
-        return "Offline";
-      }
-      return "Online";
+      }) ? "Online" : "Offline";
     },
     declineCall: function declineCall() {
       this.videoCallParams.receivingCall = false;
     },
     toggleMuteAudio: function toggleMuteAudio() {
-      if (this.mutedAudio) {
-        this.$refs.userVideo.srcObject.getAudioTracks()[0].enabled = true;
-        this.mutedAudio = false;
+      if (this.$refs.userVideo && this.$refs.userVideo.srcObject) {
+        var audioTracks = this.$refs.userVideo.srcObject.getAudioTracks();
+        if (audioTracks.length > 0) {
+          audioTracks[0].enabled = !this.mutedAudio;
+          this.mutedAudio = !this.mutedAudio;
+        } else {
+          console.warn("No audio tracks found");
+        }
       } else {
-        this.$refs.userVideo.srcObject.getAudioTracks()[0].enabled = false;
-        this.mutedAudio = true;
+        console.warn("User video stream is not available");
       }
     },
     toggleMuteVideo: function toggleMuteVideo() {
-      if (this.mutedVideo) {
-        this.$refs.userVideo.srcObject.getVideoTracks()[0].enabled = true;
-        this.mutedVideo = false;
+      if (this.$refs.userVideo && this.$refs.userVideo.srcObject) {
+        var videoTracks = this.$refs.userVideo.srcObject.getVideoTracks();
+        if (videoTracks.length > 0) {
+          videoTracks[0].enabled = !this.mutedVideo;
+          this.mutedVideo = !this.mutedVideo;
+        } else {
+          console.warn("No video tracks found");
+        }
       } else {
-        this.$refs.userVideo.srcObject.getVideoTracks()[0].enabled = false;
-        this.mutedVideo = true;
+        console.warn("User video stream is not available");
       }
     },
     stopStreamedVideo: function stopStreamedVideo(videoElem) {
-      var stream = videoElem.srcObject;
-      var tracks = stream.getTracks();
-      tracks.forEach(function (track) {
-        track.stop();
-      });
-      videoElem.srcObject = null;
+      if (videoElem && videoElem.srcObject) {
+        var stream = videoElem.srcObject;
+        var tracks = stream.getTracks();
+        tracks.forEach(function (track) {
+          track.stop();
+        });
+        videoElem.srcObject = null;
+      }
     },
     endCall: function endCall() {
       var _this6 = this;
-      // if video or audio is muted, enable it so that the stopStreamedVideo method will work
       if (!this.mutedVideo) this.toggleMuteVideo();
       if (!this.mutedAudio) this.toggleMuteAudio();
-      this.stopStreamedVideo(this.$refs.userVideo);
-      if (this.authuserid === this.videoCallParams.caller) {
-        this.videoCallParams.peer1.destroy();
-      } else {
-        this.videoCallParams.peer2.destroy();
+      if (this.$refs.userVideo) {
+        this.stopStreamedVideo(this.$refs.userVideo);
       }
-      this.videoCallParams.channel.pusher.channels.channels["presence-video-channel"].disconnect();
+      if (this.authuserid === this.videoCallParams.caller) {
+        if (this.videoCallParams.peer1) {
+          this.videoCallParams.peer1.destroy();
+        } else {
+          console.warn("peer1 is null when trying to end call");
+        }
+      } else {
+        if (this.videoCallParams.peer2) {
+          this.videoCallParams.peer2.destroy();
+        } else {
+          console.warn("peer2 is null when trying to end call");
+        }
+      }
+      if (this.videoCallParams.channel && this.videoCallParams.channel.pusher && this.videoCallParams.channel.pusher.channels) {
+        this.videoCallParams.channel.pusher.channels.channels["presence-video-channel"].disconnect();
+      } else {
+        console.warn("Unable to disconnect from presence-video-channel");
+      }
       setTimeout(function () {
         _this6.callPlaced = false;
       }, 3000);
@@ -980,29 +977,37 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   getPermissions: () => (/* binding */ getPermissions)
 /* harmony export */ });
 var getPermissions = function getPermissions() {
-  if (navigator.mediaDevices === undefined) {
+  console.log("Checking for navigator.mediaDevices...");
+  if (!navigator.mediaDevices) {
+    console.warn("navigator.mediaDevices is not defined. Creating an empty object.");
     navigator.mediaDevices = {};
   }
-  if (navigator.mediaDevices.getUserMedia === undefined) {
+  console.log("Checking for navigator.mediaDevices.getUserMedia...");
+  if (!navigator.mediaDevices.getUserMedia) {
+    console.warn("navigator.mediaDevices.getUserMedia is not defined. Providing a polyfill.");
     navigator.mediaDevices.getUserMedia = function (constraints) {
       var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
       if (!getUserMedia) {
+        console.error("getUserMedia is not implemented in this browser.");
         return Promise.reject(new Error("getUserMedia is not implemented in this browser"));
       }
+      console.log("Using legacy getUserMedia via webkitGetUserMedia or mozGetUserMedia.");
       return new Promise(function (resolve, reject) {
         getUserMedia.call(navigator, constraints, resolve, reject);
       });
     };
   }
-  return new Promise(function (resolve, reject) {
-    navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true
-    }).then(function (stream) {
-      resolve(stream);
-    })["catch"](function (err) {
-      reject(err);
-    });
+  console.log("Requesting media permissions for video and audio...");
+  return navigator.mediaDevices.getUserMedia({
+    video: true,
+    audio: true
+  }).then(function (stream) {
+    console.log("Media stream obtained successfully.");
+    return stream;
+  })["catch"](function (err) {
+    console.error("Error accessing media devices:", err);
+    alert("Could not access your camera and microphone. Please ensure you have given the necessary permissions.");
+    return Promise.reject(err);
   });
 };
 
