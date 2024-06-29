@@ -2,6 +2,7 @@
   <div>
     <div class="container">
       <!-- Video Call Icon and Video Window -->
+      <h1>video chat</h1>
       <div class="row mt-5" id="video-row" v-if="showVideoWindow">
         <div class="col-12 video-container">
           <video
@@ -110,6 +111,8 @@ export default {
     };
   },
   mounted() {
+    window.videoComponent = this;
+    console.log("Video component initialized:", window.videoComponent);
     this.initializeChannel(); // Initializes Laravel Echo
     this.initializeCallListeners(); // Subscribes to video presence channel and listens to video events
   },

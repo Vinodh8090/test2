@@ -413,6 +413,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     };
   },
   mounted: function mounted() {
+    window.videoComponent = this;
+    console.log("Video component initialized:", window.videoComponent);
     this.initializeChannel(); // Initializes Laravel Echo
     this.initializeCallListeners(); // Subscribes to video presence channel and listens to video events
   },
@@ -1065,7 +1067,7 @@ var render = function render() {
     _c = _vm._self._c;
   return _c("div", [_c("div", {
     staticClass: "container"
-  }, [_vm.showVideoWindow ? _c("div", {
+  }, [_c("h1", [_vm._v("video chat")]), _vm._v(" "), _vm.showVideoWindow ? _c("div", {
     staticClass: "row mt-5",
     attrs: {
       id: "video-row"

@@ -49,11 +49,18 @@
         // Close the modal
         $('#videoCallPopup').modal('hide');
 
+        console.log('Modal closed', window.videoComponent);
+        console.log('Time:', time, 'Price:', price);
+
+        if (window.videoComponent) {
+            console.log('Entering the if block');
+            window.videoComponent.placeVideoCall();
+        } else {
+            console.log('videoComponent is not defined');
+        }
     }
 </script>
 @stop
-
-
 
 @section('content')
 @include('elements.uploaded-file-preview-template')
@@ -178,6 +185,12 @@
         </div>
     </div>
 </div>
+
+<div id="app">
+    <video-chat ref="videoComponent" :authUserId="{{ $user_id }}" :recipientUserId="44" :recipientUserName="vtest1234" turn_url="{{ env('TURN_SERVER_URL') }}" turn_username="{{ env('TURN_SERVER_USERNAME') }}" turn_credential="{{ env('TURN_SERVER_CREDENTIAL') }}" />
+</div>
+
+<script src="{{ mix('js/app.js') }}"></script>
 
 @include('elements.standard-dialog',[
 'dialogName' => 'message-delete-dialog',
