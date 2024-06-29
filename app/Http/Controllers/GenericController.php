@@ -100,16 +100,26 @@ class GenericController extends Controller
     }
 
     /**
-     * buildmynetwork page main page
+     * mycommunity page main page
      *
      * @param Request $request
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function buildmynetwork(Request $request){
-        return view('pages.buildmynetwork', []);
+    public function mycommunity(Request $request){
+        return view('pages.mycommunity', []);
     }
 
      /**
+     * equitytoken page main page
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function equitytoken(Request $request){
+        return view('pages.equitytoken', []);
+    }
+
+    /**
      * buycredit page main page
      *
      * @param Request $request
@@ -117,6 +127,56 @@ class GenericController extends Controller
      */
     public function buycredits(Request $request){
         return view('pages.buycredits', []);
+    }
+
+     /**
+     * step1 page main page
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function step1(Request $request){
+        return view('pages.step1', []);
+    }
+
+    /**
+     * Social Media page main page
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function socialmedia(Request $request){
+        return view('pages.socialmedia', []);
+    }
+
+    /**
+     * CC cash token page main page
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function cccashtoken(Request $request){
+        return view('pages.cccashtoken', []);
+    }
+
+    /**
+     * fancci credits page main page
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function fanccicredits(Request $request){
+        return view('pages.fanccicredits', []);
+    }
+
+    /**
+     * My wallet page main page
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function mywallet(Request $request){
+        return view('pages.mywallet', []);
     }
 
     /**

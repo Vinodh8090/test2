@@ -28,4 +28,28 @@ mix
   .sass(resourcesPath + "/bootstrap.scss", outputPath)
   .sass(resourcesPath + "/bootstrap.rtl.scss", outputPath)
   .sass(resourcesPath + "/bootstrap.dark.scss", outputPath)
-  .sass(resourcesPath + "/bootstrap.rtl.dark.scss", outputPath);
+  .sass(resourcesPath + "/bootstrap.rtl.dark.scss", outputPath)
+  .webpackConfig({
+    module: {
+      rules: [
+        {
+          test: /\.(mp3|wav|ogg)$/,
+          use: [
+            {
+              loader: "file-loader",
+              options: {
+                name: "[path][name].[ext]",
+                outputPath: "audio/",
+              },
+            },
+          ],
+        },
+      ],
+    },
+  });
+
+mix.purgeCss({
+  enabled: mix.inProduction(),
+  folders: ["src", "resources"],
+  extensions: ["html", "js", "php", "vue"],
+});

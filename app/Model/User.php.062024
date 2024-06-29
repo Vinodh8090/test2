@@ -5,7 +5,6 @@ namespace App;
 use App\Model\Post;
 use App\Model\Subscription;
 use App\Model\UserList;
-use App\Model\UserLanguages;
 use App\Providers\GenericHelperServiceProvider;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -30,13 +29,7 @@ class User extends \TCG\Voyager\Models\User implements MustVerifyEmail
         'profile_access_price_12_months',
         'profile_access_price_3_months',
         'public_profile', 'city', 'country', 'state', 'email_verified_at', 'paid_profile',
-        'auth_provider','auth_provider_id', 'enable_2fa', 'enable_geoblocking', 'open_profile', 'referral_code',
-        'is_selling_pictures_videos', 'is_offering_chat', 'is_offering_live_webcam', 'has_fan_creation_subscribers',
-        'age', 'occupation', 'sexual_orientation', 'user_character', 'height', 'weight', 'clothing_size', 'figure', 'shoe_size', 'skin_colour', 'eye_colour',
-        'bust', 'bust_size', 'cup_size', 'hair', 'hair_colour', 'body_hair', 'intimate_hair', 'piercings', 'tattoos',
-        'fav_position', 'fav_food', 'fav_drink', 'fav_perfume', 'hobbies', 'secrets_desires', 'things_not_liked', 'things_liked', 'smoker', 'alcohol',
-        'facebook_link', 'instagram_link', 'twitter_link', 'tiktok_link', 'website_link',
-        'welcome_message', 'tags'
+        'auth_provider','auth_provider_id', 'enable_2fa', 'enable_geoblocking', 'open_profile', 'referral_code'
     ];
 
     /**
@@ -196,4 +189,5 @@ class User extends \TCG\Voyager\Models\User implements MustVerifyEmail
     {
         return $this->hasOne('App\Model\CreatorOffer');
     }
+
 }

@@ -25,7 +25,6 @@
 
 <script>
 export default {
-  name: "VideoChat",
   data() {
     return {
       localStream: null,
@@ -152,6 +151,8 @@ export default {
     },
   },
   mounted() {
+    // Request media permissions and displa
+
     // Request media permissions and display local video stream for both instances
     this.start();
   },

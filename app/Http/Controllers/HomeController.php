@@ -31,7 +31,7 @@ class HomeController extends Controller
         else{
             if (getSetting('site.homepage_type') == 'landing') {
                 return view('pages.home', [
-                    'featuredMembers' => MembersHelperServiceProvider::getFeaturedMembers(9),
+                    'featuredMembers' => MembersHelperServiceProvider::getFeaturedMembers(13),
                 ]);
             } else {
                 if (Auth::check()) {

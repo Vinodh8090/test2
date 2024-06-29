@@ -16,6 +16,8 @@ class EncryptCookies extends Middleware
         'app_rtl',
         'app_feed_prev_page',
         'app_prev_post',
-        'referral'
+        'referral',
+        'hideshow_menu',
+        'hideshow_sidebar'
     ];
 }

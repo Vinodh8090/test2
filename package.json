@@ -21,6 +21,7 @@
     "dropzone": "^5.9.2",
     "easymde": "^2.18.0",
     "easyqrcodejs": "^4.4.10",
+    "file-loader": "^6.2.0",
     "ionicons": "^5.5.3",
     "jquery": "^3.0.0",
     "jquery-backstretch": "^2.1.18",

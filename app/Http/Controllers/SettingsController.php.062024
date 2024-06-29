@@ -16,7 +16,6 @@ use App\Model\Subscription;
 use App\Model\Transaction;
 use App\Model\UserDevice;
 use App\Model\UserGender;
-use App\Model\UserLanguages;
 use App\Model\UserVerify;
 use App\Providers\AttachmentServiceProvider;
 use App\Providers\AuthServiceProvider;
@@ -174,6 +173,7 @@ class SettingsController extends Controller
                 ]);
                 $data['genders'] = UserGender::all();
                 $data['minBirthDate'] = Carbon::now()->subYear(18)->format('Y-m-d');
+                break;
             case 'referrals':
                 if(getSetting('referrals.enabled')) {
                     if(empty($user->referral_code)){
@@ -243,49 +243,6 @@ class SettingsController extends Controller
             'website' => $request->get('website'),
             'birthdate' => $request->get('birthdate'),
             'gender_id' => $request->get('gender'),
-            'age' => $request->get('age'),
-            'city' => $request->get('city'),
-            'country' => $request->get('country'),
-            'is_selling_pictures_videos' => $request->has('sellingPictureVideos') ? 1 : 0,
-            'is_offering_chat' => $request->has('offeringChat') ? 1 : 0,
-            'is_offering_live_webcam' => $request->has('offeringLiveWebcam') ? 1 : 0,
-            'has_fan_creation_subscribers' => $request->has('fanCreationSubscribers') ? 1 : 0,
-            'sexual_orientation' => $request->get('sexualOrientation'),
-            'occupation' => $request->get('occupation'),
-            'user_character' => $request->get('userCharacter'),
-            'height' => $request->get('height'),
-            'clothing_size' => $request->get('clothingSize'),
-            'figure' => $request->get('figure'),
-            'weight' => $request->get('weight'),
-            'shoe_size' => $request->get('shoeSize'),
-            'skin_colour' => $request->get('skinColour'),
-            'eye_colour' => $request->get('eyeColour'),
-            'bust' => $request->get('bust'),
-            'bust_size' => $request->get('bustSize'),
-            'cup_size' => $request->get('cupSize'),
-            'hair' => $request->get('hair'),
-            'hair_colour' => $request->get('hairColour'),
-            'body_hair' => $request->get('bodyHair'),
-            'intimate_hair' => $request->get('intimateHair'),
-            'piercings' => $request->has('piercings') ? 1 : 0,
-            'tattoos' => $request->has('tattoos') ? 1 : 0,
-            'fav_position' => $request->get('favPosition'),
-            'fav_food' => $request->get('favFood'),
-            'fav_drink' => $request->get('favDrink'),
-            'fav_perfume' => $request->get('favPerfume'),
-            'hobbies' => $request->get('hobbies'),
-            'secrets_desires' => $request->get('secretsDesires'),
-            'things_not_liked' => $request->get('thingsNotLiked'),
-            'things_liked' => $request->get('thingsLiked'),
-            'smoker' => $request->get('smoker'),
-            'alcohol' => $request->get('alcohol'),
-            'facebook_link' => $request->get('facebookLink'),
-            'instagram_link' => $request->get('instagramLink'),
-            'twitter_link' => $request->get('twitterLink'),
-            'tiktok_link' => $request->get('tiktokLink'),
-            'website_link' => $request->get('websiteLink'),
-            'welcome_message' => $request->get('welcomeMessage'),
-            'tags' => $request->get('tags'),
             'gender_pronoun' => $request->get('pronoun'),
         ]);
 
