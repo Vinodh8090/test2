@@ -32,7 +32,6 @@ Route::group(['prefix' => 'admin', 'middleware' => 'jsVars'], function () {
     Route::get('/users/{id}/impersonate', 'UserController@impersonate')->name('admin.impersonate');
     Route::get('/leave-impersonation', 'UserController@leaveImpersonation')->name('admin.leaveImpersonation');
     Route::get('/clear-app-cache', 'GenericController@clearAppCache')->name('admin.clear.cache');
-
 });
 
 // Home & contact page
@@ -64,7 +63,7 @@ Route::post('/video/call-user', 'App\Http\Controllers\VideoChatController@callUs
 Route::post('/video/accept-call', 'App\Http\Controllers\VideoChatController@acceptCall');
 
 /* Auth Routes + Verify password */
-Auth::routes(['verify'=>true]);
+Auth::routes(['verify' => true]);
 Route::get('email/verify', ['uses' => 'GenericController@userVerifyEmail', 'as' => 'verification.notice']);
 Route::post('resendVerification', ['uses' => 'GenericController@resendConfirmationEmail', 'as'   => 'verfication.resend']);
 // Social Auth login / register
@@ -74,7 +73,7 @@ Route::get('socialAuth/{provider}/callback', ['uses' => 'Auth\LoginController@ha
 /*
  * (User) Protected routes
  */
-Route::group(['middleware' => ['auth','verified','2fa']], function () {
+Route::group(['middleware' => ['auth', 'verified', '2fa']], function () {
     // Settings panel routes
     Route::group(['prefix' => 'my', 'as' => 'my.'], function () {
 
@@ -122,7 +121,7 @@ Route::group(['middleware' => ['auth','verified','2fa']], function () {
          * (My) Bookmarks
          */
         Route::any('/bookmarks/{type?}', ['uses' => 'BookmarksController@index', 'as'   => 'bookmarks']);
-//        Route::get('/bookmarks/{type}',['uses' => 'BookmarksController@filterBookmarks', 'as'   => 'bookmarks.filter']);
+        //        Route::get('/bookmarks/{type}',['uses' => 'BookmarksController@filterBookmarks', 'as'   => 'bookmarks.filter']);
 
         /*
          * (My) Lists
@@ -147,7 +146,6 @@ Route::group(['middleware' => ['auth','verified','2fa']], function () {
             Route::delete('delete', ['uses' => 'StreamsController@deleteStream', 'as'   => 'delete']);
             Route::post('poster-upload', ['uses' => 'StreamsController@posterUpload', 'as'   => 'poster.upload']);
         });
-
     });
 
     Route::post('authorizeStreamPresence', ['uses' => 'StreamsController@authorizeUser', 'as'  => 'public.stream.authorizeUser']);
@@ -225,7 +223,7 @@ Route::group(['middleware' => ['auth','verified','2fa']], function () {
 });
 
 // 2FA related routes
-Route::group(['middleware' => ['auth','verified']], function () {
+Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::get('device-verify', ['uses' => 'TwoFAController@index', 'as' => '2fa.index']);
     Route::post('device-verify', ['uses' => 'TwoFAController@store', 'as' => '2fa.post']);
     Route::get('device-verify/reset', ['uses' => 'TwoFAController@resend', 'as' => '2fa.resend']);

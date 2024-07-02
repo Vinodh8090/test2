@@ -386,13 +386,38 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  props: ["authUserId",
-  // Current user's ID
-  "recipientUserId",
-  // ID of the user to call
-  "recipientUserName",
-  // Name of the user to call
-  "turn_url", "turn_username", "turn_credential"],
+  props: {
+    auth_user_id: {
+      type: [String, Number],
+      required: true
+    },
+    recipient_user_id: {
+      type: [String, Number],
+      required: true
+    },
+    recipient_user_name: {
+      type: String,
+      required: true
+    },
+    turn_url: {
+      type: String,
+      required: true
+    },
+    turn_username: {
+      type: String,
+      required: true
+    },
+    turn_credential: {
+      type: String,
+      required: true
+    },
+    time_limit: {
+      type: Number,
+      "default": 300,
+      // Default to 5 minutes
+      required: true
+    }
+  },
   data: function data() {
     return {
       isFocusMyself: true,
@@ -401,6 +426,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       callPartner: null,
       mutedAudio: false,
       mutedVideo: false,
+      logs: [],
       videoCallParams: {
         stream: null,
         receivingCall: false,
@@ -409,7 +435,9 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         callAccepted: false,
         channel: null,
         peer: null
-      }
+      },
+      timeLeft: 0,
+      timerInterval: null
     };
   },
   mounted: function mounted() {
@@ -417,22 +445,28 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     console.log("Video component initialized:", window.videoComponent);
     this.initializeChannel(); // Initializes Laravel Echo
     this.initializeCallListeners(); // Subscribes to video presence channel and listens to video events
+    this.timeLeft = this.time_limit; // Initialize timer with time limit
+    console.log("Time limit prop:", this.time_limit);
+  },
+  beforeDestroy: function beforeDestroy() {
+    clearInterval(this.timerInterval);
   },
   computed: {
     incomingCallDialog: function incomingCallDialog() {
-      return this.videoCallParams.receivingCall && this.videoCallParams.caller !== this.authUserId;
+      return this.videoCallParams.receivingCall && this.videoCallParams.caller !== this.auth_user_id;
     },
     callerDetails: function callerDetails() {
       return {
         id: this.videoCallParams.caller,
-        name: this.recipientUserName
+        name: this.recipient_user_name
       };
     }
   },
   methods: {
     initializeChannel: function initializeChannel() {
       this.videoCallParams.channel = window.Echo.join("presence-video-channel");
-      console.log("User ".concat(this.authUserId, " joined the presence-video-channel."));
+      console.log("User ".concat(this.auth_user_id, " joined the presence-video-channel."));
+      console.log("Placing video call with time limit: ".concat(this.time_limit, " seconds"));
     },
     getMediaPermission: function getMediaPermission() {
       var _this = this;
@@ -456,8 +490,6 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       this.videoCallParams.channel.leaving(function (user) {
         console.log("User left the channel:", user);
       });
-
-      // Listen to incoming call
       this.videoCallParams.channel.listen("StartVideoChat", function (_ref) {
         var data = _ref.data;
         if (data.type === "incomingCall") {
@@ -480,10 +512,11 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
               case 0:
                 _this3.showVideoWindow = true;
                 _this3.callPlaced = true;
-                _this3.callPartner = _this3.recipientUserName;
+                _this3.callPartner = _this3.recipient_user_name;
                 _context.next = 5;
                 return _this3.getMediaPermission();
               case 5:
+                console.log("Placing video call with time limit: ".concat(_this3.time_limit, " seconds"));
                 _this3.videoCallParams.peer = new (simple_peer__WEBPACK_IMPORTED_MODULE_0___default())({
                   initiator: true,
                   trickle: false,
@@ -498,9 +531,9 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
                 });
                 _this3.videoCallParams.peer.on("signal", function (data) {
                   axios.post("/video/call-user", {
-                    user_to_call: _this3.recipientUserId,
+                    user_to_call: _this3.recipient_user_id,
                     signal_data: data,
-                    from: _this3.authUserId
+                    from: _this3.auth_user_id
                   }).then(function (res) {
                     return console.log("Signal sent to server", res);
                   })["catch"](function (error) {
@@ -531,7 +564,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
                     _this3.videoCallParams.peer.signal(updatedSignal);
                   }
                 });
-              case 12:
+                _this3.startTimer(); // Start the timer after setting up the call
+              case 14:
               case "end":
                 return _context.stop();
             }
@@ -552,6 +586,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
                 _context2.next = 5;
                 return _this4.getMediaPermission();
               case 5:
+                console.log("Accepting video call with time limit: ".concat(_this4.time_limit, " seconds"));
                 _this4.videoCallParams.peer = new (simple_peer__WEBPACK_IMPORTED_MODULE_0___default())({
                   initiator: false,
                   trickle: false,
@@ -586,13 +621,38 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
                   console.log("Call closed by accepter");
                 });
                 _this4.videoCallParams.peer.signal(_this4.videoCallParams.callerSignal);
-              case 13:
+                _this4.startTimer(); // Start the timer after accepting the call
+              case 15:
               case "end":
                 return _context2.stop();
             }
           }
         }, _callee2);
       }))();
+    },
+    startTimer: function startTimer() {
+      var _this5 = this;
+      if (this.time_limit <= 0) {
+        console.error("Invalid time limit. Ending call immediately.");
+        this.endCall();
+        return;
+      }
+      this.timeLeft = this.time_limit;
+      console.log("Timer started with ".concat(this.timeLeft, " seconds"));
+      this.timerInterval = setInterval(function () {
+        if (_this5.timeLeft > 0) {
+          _this5.timeLeft -= 1;
+          console.log("Time left: ".concat(_this5.timeLeft, " seconds"));
+        } else {
+          console.log("Time is up. Ending call.");
+          _this5.endCall();
+        }
+      }, 1000);
+    },
+    formatTime: function formatTime(seconds) {
+      var minutes = Math.floor(seconds / 60);
+      var secs = seconds % 60;
+      return "".concat(minutes, ":").concat(secs < 10 ? "0" : "").concat(secs);
     },
     toggleCameraArea: function toggleCameraArea() {
       if (this.videoCallParams.callAccepted) {
@@ -620,11 +680,36 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         }
       }
     },
+    log: function log(message) {
+      this.logs.push(message);
+    },
+    logWebRTCStats: function logWebRTCStats() {
+      var _this6 = this;
+      var peerConnection = this.videoCallParams.peer;
+      if (peerConnection) {
+        peerConnection.getStats(null).then(function (stats) {
+          stats.forEach(function (report) {
+            // Example of logging ping time (you need to find the correct metric)
+            if (report.type === "candidate-pair" && report.remoteCandidateType === "relay") {
+              _this6.log("Ping speed: ".concat(report.currentRoundTripTime, "ms"));
+            }
+            // Log other relevant WebRTC stats
+            _this6.log("WebRTC Stats: ".concat(JSON.stringify(report)));
+          });
+        })["catch"](function (error) {
+          console.error("Error getting WebRTC stats:", error);
+        });
+      } else {
+        this.log("Peer connection not available.");
+      }
+    },
     endCall: function endCall() {
       this.videoCallParams.callAccepted = false;
       this.callPlaced = false;
       this.callPartner = null;
       this.showVideoWindow = false;
+      this.timeLeft = 0;
+      clearInterval(this.timerInterval);
       if (this.videoCallParams.stream) {
         this.videoCallParams.stream.getTracks().forEach(function (track) {
           track.stop();
@@ -637,11 +722,11 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       this.playCallEndSound();
     },
     playIncomingCallSound: function playIncomingCallSound() {
-      var audio = new Audio("/sounds/incoming_call.mp3");
+      var audio = new Audio("../audio/incoming-call.mp3");
       audio.play();
     },
     playCallEndSound: function playCallEndSound() {
-      var audio = new Audio("/sounds/call_end.mp3");
+      var audio = new Audio("../audio/call-end.mp3");
       audio.play();
     }
   }
@@ -1065,16 +1150,17 @@ __webpack_require__.r(__webpack_exports__);
 var render = function render() {
   var _vm = this,
     _c = _vm._self._c;
-  return _c("div", [_c("div", {
+  return _c("div", {
+    staticClass: "video-chat-container"
+  }, [_c("div", {
     staticClass: "container"
-  }, [_c("h1", [_vm._v("video chat")]), _vm._v(" "), _vm.showVideoWindow ? _c("div", {
-    staticClass: "row mt-5",
-    attrs: {
-      id: "video-row"
-    }
+  }, [_c("h1", [_vm._v("Video Chat")]), _vm._v(" "), _vm.showVideoWindow ? _c("div", {
+    staticClass: "row mt-5 video-row"
   }, [_c("div", {
     staticClass: "col-12 video-container"
-  }, [_c("video", {
+  }, [_vm.timeLeft > 0 ? _c("div", {
+    staticClass: "timer"
+  }, [_vm._v("\n          Time left: " + _vm._s(_vm.formatTime(_vm.timeLeft)) + "\n        ")]) : _vm._e(), _vm._v(" "), _c("video", {
     ref: "userVideo",
     staticClass: "cursor-pointer",
     "class": _vm.isFocusMyself ? "user-video" : "partner-video",
@@ -1146,8 +1232,7 @@ var render = function render() {
   }, [_c("button", {
     staticClass: "btn btn-danger",
     attrs: {
-      type: "button",
-      "data-dismiss": "modal"
+      type: "button"
     },
     on: {
       click: _vm.declineCall
@@ -1160,7 +1245,13 @@ var render = function render() {
     on: {
       click: _vm.acceptCall
     }
-  }, [_vm._v("\n            Accept\n          ")])])])]) : _vm._e()])]);
+  }, [_vm._v("\n            Accept\n          ")])])])]) : _vm._e()]), _vm._v(" "), _c("div", {
+    staticClass: "logs"
+  }, [_c("h3", [_vm._v("Logs and WebRTC Details:")]), _vm._v(" "), _c("ul", _vm._l(_vm.logs, function (log) {
+    return _c("li", {
+      key: log
+    }, [_vm._v(_vm._s(log))]);
+  }), 0)])]);
 };
 var staticRenderFns = [];
 render._withStripped = true;
@@ -8122,7 +8213,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.video-container[data-v-737f9f18] {\r\n  position: relative;\r\n  display: flex;\r\n  justify-content: center;\r\n  align-items: center;\n}\n.user-video[data-v-737f9f18],\r\n.partner-video[data-v-737f9f18] {\r\n  width: 100%;\r\n  max-width: 600px;\r\n  border: 1px solid #ddd;\n}\n.user-video[data-v-737f9f18] {\r\n  position: relative;\r\n  z-index: 2;\n}\n.partner-video[data-v-737f9f18] {\r\n  position: absolute;\r\n  top: 0;\r\n  left: 0;\r\n  z-index: 1;\r\n  opacity: 0.8;\n}\n.action-btns[data-v-737f9f18] {\r\n  position: absolute;\r\n  bottom: 20px;\r\n  left: 50%;\r\n  transform: translateX(-50%);\r\n  display: flex;\r\n  justify-content: center;\n}\r\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n#video-row[data-v-737f9f18] {\r\n  width: 700px;\r\n  max-width: 90vw;\n}\n#incoming-call-card[data-v-737f9f18] {\r\n  border: 1px solid #0acf83;\n}\n.video-container[data-v-737f9f18] {\r\n  width: 700px;\r\n  height: 500px;\r\n  max-width: 90vw;\r\n  max-height: 50vh;\r\n  margin: 0 auto;\r\n  border: 1px solid #0acf83;\r\n  position: relative;\r\n  box-shadow: 1px 1px 11px #9e9e9e;\r\n  background-color: #fff;\n}\n.video-container .user-video[data-v-737f9f18] {\r\n  width: 30%;\r\n  position: absolute;\r\n  left: 10px;\r\n  bottom: 10px;\r\n  border: 1px solid #fff;\r\n  border-radius: 6px;\r\n  z-index: 2;\n}\n.video-container .partner-video[data-v-737f9f18] {\r\n  width: 100%;\r\n  height: 100%;\r\n  position: absolute;\r\n  left: 0;\r\n  right: 0;\r\n  bottom: 0;\r\n  top: 0;\r\n  z-index: 1;\r\n  margin: 0;\r\n  padding: 0;\n}\n.video-container .action-btns[data-v-737f9f18] {\r\n  position: absolute;\r\n  bottom: 20px;\r\n  left: 50%;\r\n  margin-left: -50px;\r\n  z-index: 3;\r\n  display: flex;\r\n  flex-direction: row;\n}\r\n\r\n/* Mobile Styles */\n@media only screen and (max-width: 768px) {\n.video-container[data-v-737f9f18] {\r\n    height: 50vh;\n}\n}\r\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 

@@ -18,6 +18,22 @@
 <!-- Include jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+<style>
+    /* Center the modal popup */
+    #videoCallPopup .modal-dialog {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100% - 1rem);
+    }
+
+    #videoCallPopup .modal-dialog-centered {
+        display: flex;
+        align-items: center;
+        min-height: calc(100% - 1rem);
+    }
+</style>
+
 {!! Minify::javascript([
 '/js/messenger/messenger.js',
 '/js/messenger/elements.js',
@@ -43,16 +59,18 @@
     function confirmVideoCall() {
         let time = $('#time').val();
         let price = $('#price').val();
-        // Example: Perform further actions based on time and price inputs
-        // For example, send this data to a backend endpoint, etc.
+
+        // Update hidden input with the new time value
+        $('#timeLimitInput').val(time);
 
         // Close the modal
         $('#videoCallPopup').modal('hide');
 
         console.log('Modal closed', window.videoComponent);
-        console.log('Time:', time, 'Price:', price);
 
         if (window.videoComponent) {
+            window.videoComponent.timeLimit = time;
+            console.log('Time:', time, 'Price:', price);
             console.log('Entering the if block');
             window.videoComponent.placeVideoCall();
         } else {
@@ -156,13 +174,11 @@
     </div>
 </div>
 
-<!-- Modal for video call details -->
 <div id="videoCallPopup" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">{{ __('Video Call Details') }}</h5>
-                <span>User ID: {{ $user_id }}</span>
                 <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('Close') }}">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -170,13 +186,12 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="time">{{ __('Time') }}</label>
-                    <input type="text" class="form-control" id="time" placeholder="{{ __('Enter time') }}" value="15 mins">
+                    <input type="number" class="form-control" id="time" placeholder="{{ __('Enter time') }}" value="15 mins">
                 </div>
                 <div class="form-group">
                     <label for="price">{{ __('Price') }}</label>
                     <input type="text" class="form-control" id="price" placeholder="{{ __('Enter price') }}" value="$150">
                 </div>
-
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Cancel') }}</button>
@@ -187,8 +202,19 @@
 </div>
 
 <div id="app">
-    <video-chat ref="videoComponent" :authUserId="{{ $user_id }}" :recipientUserId="44" :recipientUserName="vtest1234" turn_url="{{ env('TURN_SERVER_URL') }}" turn_username="{{ env('TURN_SERVER_USERNAME') }}" turn_credential="{{ env('TURN_SERVER_CREDENTIAL') }}" />
+    <video-chat ref="videoComponent" :authUserId="{{ $user_id }}" :recipient_user_id="{{ env('RECIPIENTID') }}" :recipient_user_name="{{ json_encode('vTest1234') }}" turn_url="{{ env('TURN_SERVER_URL') }}" turn_username="{{ env('TURN_SERVER_USERNAME') }}" turn_credential="{{ env('TURN_SERVER_CREDENTIAL') }}" :time_limit="timeLimit" />
 </div>
+
+<input type="hidden" id="timeLimitInput" value="{{ env('TIMELIMIT') }}">
+
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            timeLimit: document.getElementById('timeLimitInput').value
+        }
+    });
+</script>
 
 <script src="{{ mix('js/app.js') }}"></script>
 

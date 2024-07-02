@@ -1,10 +1,13 @@
 <template>
-  <div>
+  <div class="video-chat-container">
     <div class="container">
       <!-- Video Call Icon and Video Window -->
-      <h1>video chat</h1>
-      <div class="row mt-5" id="video-row" v-if="showVideoWindow">
+      <h1>Video Chat</h1>
+      <div class="row mt-5 video-row" v-if="showVideoWindow">
         <div class="col-12 video-container">
+          <div v-if="timeLeft > 0" class="timer">
+            Time left: {{ formatTime(timeLeft) }}
+          </div>
           <video
             ref="userVideo"
             muted
@@ -57,12 +60,7 @@
             Incoming Call From <strong>{{ callerDetails.name }}</strong>
           </p>
           <div class="btn-group" role="group">
-            <button
-              type="button"
-              class="btn btn-danger"
-              data-dismiss="modal"
-              @click="declineCall"
-            >
+            <button type="button" class="btn btn-danger" @click="declineCall">
               Decline
             </button>
             <button
@@ -77,20 +75,52 @@
       </div>
       <!-- End of Incoming Call -->
     </div>
+
+    <div class="logs">
+      <h3>Logs and WebRTC Details:</h3>
+      <ul>
+        <li v-for="log in logs" :key="log">{{ log }}</li>
+      </ul>
+    </div>
   </div>
 </template>
+
 <script>
 import Peer from "simple-peer";
 import { getPermissions } from "../helper";
+
 export default {
-  props: [
-    "authUserId", // Current user's ID
-    "recipientUserId", // ID of the user to call
-    "recipientUserName", // Name of the user to call
-    "turn_url",
-    "turn_username",
-    "turn_credential",
-  ],
+  props: {
+    auth_user_id: {
+      type: [String, Number],
+      required: true,
+    },
+    recipient_user_id: {
+      type: [String, Number],
+      required: true,
+    },
+    recipient_user_name: {
+      type: String,
+      required: true,
+    },
+    turn_url: {
+      type: String,
+      required: true,
+    },
+    turn_username: {
+      type: String,
+      required: true,
+    },
+    turn_credential: {
+      type: String,
+      required: true,
+    },
+    time_limit: {
+      type: Number,
+      default: 300, // Default to 5 minutes
+      required: true,
+    },
+  },
   data() {
     return {
       isFocusMyself: true,
@@ -99,6 +129,7 @@ export default {
       callPartner: null,
       mutedAudio: false,
       mutedVideo: false,
+      logs: [],
       videoCallParams: {
         stream: null,
         receivingCall: false,
@@ -108,6 +139,8 @@ export default {
         channel: null,
         peer: null,
       },
+      timeLeft: 0,
+      timerInterval: null,
     };
   },
   mounted() {
@@ -115,26 +148,37 @@ export default {
     console.log("Video component initialized:", window.videoComponent);
     this.initializeChannel(); // Initializes Laravel Echo
     this.initializeCallListeners(); // Subscribes to video presence channel and listens to video events
+    this.timeLeft = this.time_limit; // Initialize timer with time limit
+    console.log("Time limit prop:", this.time_limit);
+  },
+  beforeDestroy() {
+    clearInterval(this.timerInterval);
   },
   computed: {
     incomingCallDialog() {
       return (
         this.videoCallParams.receivingCall &&
-        this.videoCallParams.caller !== this.authUserId
+        this.videoCallParams.caller !== this.auth_user_id
       );
     },
     callerDetails() {
       return {
         id: this.videoCallParams.caller,
-        name: this.recipientUserName,
+        name: this.recipient_user_name,
       };
     },
   },
   methods: {
     initializeChannel() {
       this.videoCallParams.channel = window.Echo.join("presence-video-channel");
-      console.log(`User ${this.authUserId} joined the presence-video-channel.`);
+      console.log(
+        `User ${this.auth_user_id} joined the presence-video-channel.`
+      );
+      console.log(
+        `Placing video call with time limit: ${this.time_limit} seconds`
+      );
     },
+
     getMediaPermission() {
       return getPermissions()
         .then((stream) => {
@@ -160,7 +204,6 @@ export default {
         console.log("User left the channel:", user);
       });
 
-      // Listen to incoming call
       this.videoCallParams.channel.listen("StartVideoChat", ({ data }) => {
         if (data.type === "incomingCall") {
           const updatedSignal = {
@@ -177,8 +220,12 @@ export default {
     async placeVideoCall() {
       this.showVideoWindow = true;
       this.callPlaced = true;
-      this.callPartner = this.recipientUserName;
+      this.callPartner = this.recipient_user_name;
       await this.getMediaPermission();
+
+      console.log(
+        `Placing video call with time limit: ${this.time_limit} seconds`
+      );
 
       this.videoCallParams.peer = new Peer({
         initiator: true,
@@ -198,9 +245,9 @@ export default {
       this.videoCallParams.peer.on("signal", (data) => {
         axios
           .post("/video/call-user", {
-            user_to_call: this.recipientUserId,
+            user_to_call: this.recipient_user_id,
             signal_data: data,
-            from: this.authUserId,
+            from: this.auth_user_id,
           })
           .then((res) => console.log("Signal sent to server", res))
           .catch((error) => {
@@ -228,20 +275,23 @@ export default {
 
       this.videoCallParams.channel.listen("StartVideoChat", ({ data }) => {
         if (data.type === "callAccepted") {
-          const updatedSignal = {
-            ...data.signal,
-            sdp: `${data.signal.sdp}\n`,
-          };
+          const updatedSignal = { ...data.signal, sdp: `${data.signal.sdp}\n` };
           this.videoCallParams.callAccepted = true;
           this.videoCallParams.peer.signal(updatedSignal);
         }
       });
+
+      this.startTimer(); // Start the timer after setting up the call
     },
     async acceptCall() {
       this.showVideoWindow = true;
       this.callPlaced = true;
       this.videoCallParams.callAccepted = true;
       await this.getMediaPermission();
+
+      console.log(
+        `Accepting video call with time limit: ${this.time_limit} seconds`
+      );
 
       this.videoCallParams.peer = new Peer({
         initiator: false,
@@ -289,6 +339,32 @@ export default {
       });
 
       this.videoCallParams.peer.signal(this.videoCallParams.callerSignal);
+
+      this.startTimer(); // Start the timer after accepting the call
+    },
+    startTimer() {
+      if (this.time_limit <= 0) {
+        console.error("Invalid time limit. Ending call immediately.");
+        this.endCall();
+        return;
+      }
+
+      this.timeLeft = this.time_limit;
+      console.log(`Timer started with ${this.timeLeft} seconds`);
+      this.timerInterval = setInterval(() => {
+        if (this.timeLeft > 0) {
+          this.timeLeft -= 1;
+          console.log(`Time left: ${this.timeLeft} seconds`);
+        } else {
+          console.log("Time is up. Ending call.");
+          this.endCall();
+        }
+      }, 1000);
+    },
+    formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
     },
     toggleCameraArea() {
       if (this.videoCallParams.callAccepted) {
@@ -316,11 +392,42 @@ export default {
         }
       }
     },
+    log(message) {
+      this.logs.push(message);
+    },
+    logWebRTCStats() {
+      const peerConnection = this.videoCallParams.peer;
+
+      if (peerConnection) {
+        peerConnection
+          .getStats(null)
+          .then((stats) => {
+            stats.forEach((report) => {
+              // Example of logging ping time (you need to find the correct metric)
+              if (
+                report.type === "candidate-pair" &&
+                report.remoteCandidateType === "relay"
+              ) {
+                this.log(`Ping speed: ${report.currentRoundTripTime}ms`);
+              }
+              // Log other relevant WebRTC stats
+              this.log(`WebRTC Stats: ${JSON.stringify(report)}`);
+            });
+          })
+          .catch((error) => {
+            console.error("Error getting WebRTC stats:", error);
+          });
+      } else {
+        this.log("Peer connection not available.");
+      }
+    },
     endCall() {
       this.videoCallParams.callAccepted = false;
       this.callPlaced = false;
       this.callPartner = null;
       this.showVideoWindow = false;
+      this.timeLeft = 0;
+      clearInterval(this.timerInterval);
 
       if (this.videoCallParams.stream) {
         this.videoCallParams.stream.getTracks().forEach((track) => {
@@ -337,50 +444,76 @@ export default {
       this.playCallEndSound();
     },
     playIncomingCallSound() {
-      const audio = new Audio("/sounds/incoming_call.mp3");
+      const audio = new Audio("../audio/incoming-call.mp3");
       audio.play();
     },
     playCallEndSound() {
-      const audio = new Audio("/sounds/call_end.mp3");
+      const audio = new Audio("../audio/call-end.mp3");
       audio.play();
     },
   },
 };
 </script>
+
 <style scoped>
+#video-row {
+  width: 700px;
+  max-width: 90vw;
+}
+
+#incoming-call-card {
+  border: 1px solid #0acf83;
+}
+
 .video-container {
+  width: 700px;
+  height: 500px;
+  max-width: 90vw;
+  max-height: 50vh;
+  margin: 0 auto;
+  border: 1px solid #0acf83;
   position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  box-shadow: 1px 1px 11px #9e9e9e;
+  background-color: #fff;
 }
 
-.user-video,
-.partner-video {
-  width: 100%;
-  max-width: 600px;
-  border: 1px solid #ddd;
-}
-
-.user-video {
-  position: relative;
+.video-container .user-video {
+  width: 30%;
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  border: 1px solid #fff;
+  border-radius: 6px;
   z-index: 2;
 }
 
-.partner-video {
+.video-container .partner-video {
+  width: 100%;
+  height: 100%;
   position: absolute;
-  top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
   z-index: 1;
-  opacity: 0.8;
+  margin: 0;
+  padding: 0;
 }
 
-.action-btns {
+.video-container .action-btns {
   position: absolute;
   bottom: 20px;
   left: 50%;
-  transform: translateX(-50%);
+  margin-left: -50px;
+  z-index: 3;
   display: flex;
-  justify-content: center;
+  flex-direction: row;
+}
+
+/* Mobile Styles */
+@media only screen and (max-width: 768px) {
+  .video-container {
+    height: 50vh;
+  }
 }
 </style>
