@@ -463,7 +463,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   },
   methods: {
     initializeChannel: function initializeChannel() {
-      this.videoCallParams.channel = window.Echo.join("presence-video-channel");
+      var userChannel = "presence-video-channel.".concat(this.auth_user_id);
+      this.videoCallParams.channel = window.Echo.join(userChannel);
       this.log("User ".concat(this.auth_user_id, " joined the presence-video-channel."));
       console.log("User ".concat(this.auth_user_id, " joined the presence-video-channel."));
       console.log("Placing video call with time limit: ".concat(this.time_limit, " seconds to user ").concat(this.recipient_user_id, " ").concat(this.recipient_user_name));

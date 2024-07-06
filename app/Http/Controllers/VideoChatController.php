@@ -11,24 +11,28 @@ class VideoChatController extends Controller
 {
     public function callUser(Request $request)
     {
-        $data['userToCall'] = $request->user_to_call;
-        $data['from'] = Auth::id();
-        $data['signalData'] = $request->signal_data;
-        $data['type'] = 'incomingCall';
+        $data = [
+            'userToCall' => $request->user_to_call,
+            'from' => Auth::id(),
+            'signalData' => $request->signal_data,
+            'type' => 'incomingCall'
+        ];
 
         Log::info('Broadcasting StartVideoChat', $data);
 
-        broadcast(new StartVideoChat($data))->toOthers();
+        broadcast(new StartVideoChat($data, $request->user_to_call))->toOthers();
     }
 
     public function acceptCall(Request $request)
     {
-        $data['signal'] = $request->signal;
-        $data['to'] = $request->to;
-        $data['type'] = 'callAccepted';
+        $data = [
+            'signal' => $request->signal,
+            'to' => $request->to,
+            'type' => 'callAccepted'
+        ];
 
         Log::info('Broadcasting StartVideoChat acceptCall');
 
-        broadcast(new StartVideoChat($data))->toOthers();
+        broadcast(new StartVideoChat($data, $request->to))->toOthers();
     }
 }

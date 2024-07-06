@@ -19,15 +19,14 @@ Broadcast::channel('App.User.{id}', function ($user, $id) {
 });
 
 
-
-Broadcast::channel('user-{recipientUserId}', function ($user, $recipientUserId) {
+Broadcast::channel('presence-video-channel.{recipientUserId}', function ($user, $recipientUserId) {
     Log::info("User attempting to join channel 'user-{$recipientUserId}'", ['user' => $user]);
 
     if ($user && $user->id == $recipientUserId) {
         Log::info("User is authenticated and matches recipient user ID", ['id' => $user->id, 'name' => $user->name]);
         return ['id' => $user->id, 'name' => $user->name];
     } else {
-        Log::warning("User is not authenticated or does not match recipient user ID");
+        Log::warning("User is not authenticated or does not match recipient user ID", ['user' => $user, 'recipientUserId' => $recipientUserId]);
         return false;
     }
 });

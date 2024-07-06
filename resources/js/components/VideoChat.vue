@@ -169,7 +169,8 @@ export default {
   },
   methods: {
     initializeChannel() {
-      this.videoCallParams.channel = window.Echo.join("presence-video-channel");
+      const userChannel = `presence-video-channel.${this.auth_user_id}`;
+      this.videoCallParams.channel = window.Echo.join(userChannel);
       this.log(`User ${this.auth_user_id} joined the presence-video-channel.`);
       console.log(
         `User ${this.auth_user_id} joined the presence-video-channel.`
