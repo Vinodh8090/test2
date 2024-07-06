@@ -6,14 +6,13 @@
                     <div class="mfv-errorBox"></div>
                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                     @if(!isset($user))
-                        <div class="input-holder">
-                            <select id="select-repo" name="receiverID" class="repositories form-control input-sm"  multiple="multiple" placeholder="{{__('To...')}}"></select>
-                        </div>
+                    <div class="input-holder">
+                        <select id="select-repo" name="receiverID" class="repositories form-control input-sm" multiple="multiple" placeholder="{{__('To...')}}"></select>
+                    </div>
                     @else
-                        <input type="hidden" name="receiverID" value="{{$user->id}}">
+                    <input type="hidden" name="receiverID" value="{{$user->id}}">
                     @endif
                 </form>
-
             </div>
             <div class=" pt-2 pr-0 d-flex justify-content-end pl-3 pr-2">
                 <div class="d-flex justify-content-center align-items-center">

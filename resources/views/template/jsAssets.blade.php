@@ -1,17 +1,17 @@
 {{-- Global JS Assets --}}
 {!!
-    Minify::javascript(
-        array_merge([
-        '/libs/jquery/dist/jquery.min.js',
-        '/libs/popper.js/dist/umd/popper.min.js',
-        '/libs/bootstrap/dist/js/bootstrap.min.js',
-        '/js/plugins/toasts.js',
-        '/libs/cookieconsent/build/cookieconsent.min.js',
-        '/libs/xss/dist/xss.min.js',
-        '/js/app.js',
-    ],
-    (isset($additionalJs) ? $additionalJs : [])
-    ))->withFullUrl()
+Minify::javascript(
+array_merge([
+'/libs/jquery/dist/jquery.min.js',
+'/libs/popper.js/dist/umd/popper.min.js',
+'/libs/bootstrap/dist/js/bootstrap.min.js',
+'/js/plugins/toasts.js',
+'/libs/cookieconsent/build/cookieconsent.min.js',
+'/libs/xss/dist/xss.min.js',
+'/js/app.js',
+],
+(isset($additionalJs) ? $additionalJs : [])
+))->withFullUrl()
 !!}
 
 {{-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries --}}
@@ -27,7 +27,7 @@
 <script nomodule src="{{asset('/libs/ionicons/dist/ionicons/ionicons.js')}}"></script>
 
 @if(getSetting('custom-code-ads.custom_js'))
-    {!! getSetting('custom-code-ads.custom_js') !!}
+{!! getSetting('custom-code-ads.custom_js') !!}
 @endif
 
 @include('elements.translations')

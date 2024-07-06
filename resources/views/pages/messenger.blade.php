@@ -69,7 +69,7 @@
         console.log('Modal closed', window.videoComponent);
 
         if (window.videoComponent) {
-            window.videoComponent.timeLimit = time;
+            window.videoComponent.time_limit = time;
             console.log('Time:', time, 'Price:', price);
             console.log('Entering the if block');
             window.videoComponent.placeVideoCall();
@@ -121,15 +121,9 @@
                     @include('elements.messenger.messenger-new-conversation-header')
                     @include('elements.preloading.messenger-conversation-header-box')
                     @include('elements.preloading.messenger-conversation-box')
+
+
                     <div class="conversation-content pt-4 pb-1 px-3 flex-fill">
-                        <div class="d-flex justify-content-center align-items-center">
-                            <!-- Video call icon -->
-                            <button class="btn btn-outline-primary btn-rounded-icon messenger-button mx-2 to-tooltip" title="{{ __('Start video call') }}" onclick="showVideoCallPopup()">
-                                <div class="d-flex justify-content-center align-items-center">
-                                    <i class="fas fa-video"></i>
-                                </div>
-                            </button>
-                        </div>
                     </div>
 
                     <!-- Dropzone and message input area -->
@@ -166,6 +160,15 @@
                                     @include('elements.icon',['icon'=>'paper-plane','variant'=>''])
                                 </div>
                             </button>
+
+                            <div class="d-flex justify-content-center align-items-center">
+                                <!-- Video call icon -->
+                                <button class="btn btn-outline-primary btn-rounded-icon messenger-button mx-2 to-tooltip" title="{{ __('Start video call') }}" onclick="showVideoCallPopup()">
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <i class="fas fa-video"></i>
+                                    </div>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -173,6 +176,7 @@
         </div>
     </div>
 </div>
+
 
 <div id="videoCallPopup" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -202,19 +206,9 @@
 </div>
 
 <div id="app">
-    <video-chat ref="videoComponent" :authUserId="{{ $user_id }}" :recipient_user_id="{{ env('RECIPIENTID') }}" :recipient_user_name="{{ json_encode('vTest1234') }}" turn_url="{{ env('TURN_SERVER_URL') }}" turn_username="{{ env('TURN_SERVER_USERNAME') }}" turn_credential="{{ env('TURN_SERVER_CREDENTIAL') }}" :time_limit="timeLimit" />
+    <video-chat ref="videoComponent" :auth_user_id="{{ $user_id }}" :recipient_user_id="{{ $recipient_id }}" :recipient_user_name="{{ json_encode('vTest1234') }}" turn_url="{{ env('TURN_SERVER_URL') }}" turn_username="{{ env('TURN_SERVER_USERNAME') }}" turn_credential="{{ env('TURN_SERVER_CREDENTIAL') }}" :time_limit="timeLimit" />
 </div>
 
-<input type="hidden" id="timeLimitInput" value="{{ env('TIMELIMIT') }}">
-
-<script>
-    var app = new Vue({
-        el: '#app',
-        data: {
-            timeLimit: document.getElementById('timeLimitInput').value
-        }
-    });
-</script>
 
 <script src="{{ mix('js/app.js') }}"></script>
 

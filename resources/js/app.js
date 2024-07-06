@@ -1,11 +1,7 @@
-/**
- * First we will load all of this project's JavaScript dependencies which
- * includes Vue and other libraries. It is a great starting point when
- * building robust, powerful web applications using Vue and Laravel.
- */
 require("./bootstrap");
 
-import Vue from "vue"; // Importing Vue instead of using require
+import Vue from "vue"; // Importing Vue
+import { filterXSS } from "xss"; // Importing the xss library
 
 // Making Vue available globally is not necessary if you import it
 // Vue is already available within this file and can be used directly
@@ -49,3 +45,12 @@ Vue.component("viewer", require("./components/Viewer.vue").default);
 const app = new Vue({
   el: "#app", // Mounting Vue instance to the #app element in your HTML
 });
+
+// Your custom JavaScript code
+function contactElement(contact) {
+  // Use filterXSS to sanitize any user-generated content
+  const sanitizedContactName = filterXSS(contact.name);
+  const sanitizedContactMessage = filterXSS(contact.message);
+
+  // Your code to create and return the contact element using sanitizedContactName and sanitizedContactMessage
+}

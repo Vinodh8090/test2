@@ -79,7 +79,7 @@
     <div class="logs">
       <h3>Logs and WebRTC Details:</h3>
       <ul>
-        <li v-for="log in logs" :key="log">{{ log }}</li>
+        <li v-for="(log, index) in logs" :key="index">{{ log }}</li>
       </ul>
     </div>
   </div>
@@ -149,7 +149,6 @@ export default {
     this.initializeChannel(); // Initializes Laravel Echo
     this.initializeCallListeners(); // Subscribes to video presence channel and listens to video events
     this.timeLeft = this.time_limit; // Initialize timer with time limit
-    console.log("Time limit prop:", this.time_limit);
   },
   beforeDestroy() {
     clearInterval(this.timerInterval);
@@ -171,11 +170,12 @@ export default {
   methods: {
     initializeChannel() {
       this.videoCallParams.channel = window.Echo.join("presence-video-channel");
+      this.log(`User ${this.auth_user_id} joined the presence-video-channel.`);
       console.log(
         `User ${this.auth_user_id} joined the presence-video-channel.`
       );
       console.log(
-        `Placing video call with time limit: ${this.time_limit} seconds`
+        `Placing video call with time limit: ${this.time_limit} seconds to user ${this.recipient_user_id} ${this.recipient_user_name}`
       );
     },
 
@@ -193,14 +193,17 @@ export default {
     },
     initializeCallListeners() {
       this.videoCallParams.channel.here((users) => {
+        this.log("Users currently in the channel: " + JSON.stringify(users));
         console.log("Users currently in the channel:", users);
       });
 
       this.videoCallParams.channel.joining((user) => {
+        this.log("User joined the channel: " + JSON.stringify(user));
         console.log("User joined the channel:", user);
       });
 
       this.videoCallParams.channel.leaving((user) => {
+        this.log("User left the channel: " + JSON.stringify(user));
         console.log("User left the channel:", user);
       });
 
@@ -214,6 +217,8 @@ export default {
           this.videoCallParams.caller = data.from;
           this.videoCallParams.callerSignal = updatedSignal;
           this.playIncomingCallSound();
+          this.log("Incoming call from: " + data.from);
+          console.log("Incoming call from: " + data.from);
         }
       });
     },
@@ -223,8 +228,8 @@ export default {
       this.callPartner = this.recipient_user_name;
       await this.getMediaPermission();
 
-      console.log(
-        `Placing video call with time limit: ${this.time_limit} seconds`
+      this.log(
+        `Placing video call with time limit: ${this.time_limit} seconds to user ${this.recipient_user_id} ${this.recipient_user_name}`
       );
 
       this.videoCallParams.peer = new Peer({
@@ -249,8 +254,12 @@ export default {
             signal_data: data,
             from: this.auth_user_id,
           })
-          .then((res) => console.log("Signal sent to server", res))
+          .then((res) => {
+            this.log("Signal sent to server waiting for call acceptance");
+            console.log("Signal sent to server", res);
+          })
           .catch((error) => {
+            this.log("Error sending signal to server: " + error.message);
             console.error(error);
           });
       });
@@ -258,18 +267,23 @@ export default {
       this.videoCallParams.peer.on("stream", (stream) => {
         if (this.$refs.partnerVideo) {
           this.$refs.partnerVideo.srcObject = stream;
+          this.startPingTest();
         }
       });
 
       this.videoCallParams.peer.on("connect", () => {
+        this.log("Peer connected");
         console.log("Peer connected");
+        this.startPingTest();
       });
 
       this.videoCallParams.peer.on("error", (err) => {
+        this.log("Peer connection error: " + err.message);
         console.error("Peer connection error", err);
       });
 
       this.videoCallParams.peer.on("close", () => {
+        this.log("Call closed by caller");
         console.log("Call closed by caller");
       });
 
@@ -287,9 +301,11 @@ export default {
       this.showVideoWindow = true;
       this.callPlaced = true;
       this.videoCallParams.callAccepted = true;
+      this.videoCallParams.receivingCall = false;
+      this.callPartner = this.recipient_user_name;
       await this.getMediaPermission();
 
-      console.log(
+      this.log(
         `Accepting video call with time limit: ${this.time_limit} seconds`
       );
 
@@ -308,55 +324,61 @@ export default {
         },
       });
 
-      this.videoCallParams.receivingCall = false;
-
       this.videoCallParams.peer.on("signal", (data) => {
         axios
-          .post("/video/accept-call", {
-            signal: data,
+          .post("/video/call-accepted", {
+            signal_data: data,
             to: this.videoCallParams.caller,
           })
-          .then(() => {})
+          .then((res) => {
+            this.log("Signal sent to server");
+            console.log("Signal sent to server", res);
+          })
           .catch((error) => {
+            this.log("Error sending signal to server: " + error.message);
             console.error(error);
           });
       });
 
       this.videoCallParams.peer.on("stream", (stream) => {
-        this.$refs.partnerVideo.srcObject = stream;
+        if (this.$refs.partnerVideo) {
+          this.$refs.partnerVideo.srcObject = stream;
+        }
       });
 
       this.videoCallParams.peer.on("connect", () => {
+        this.log("Peer connected");
         console.log("Peer connected");
       });
 
       this.videoCallParams.peer.on("error", (err) => {
+        this.log("Peer connection error: " + err.message);
         console.error("Peer connection error", err);
       });
 
       this.videoCallParams.peer.on("close", () => {
-        console.log("Call closed by accepter");
+        this.log("Call closed by recipient");
+        console.log("Call closed by recipient");
       });
 
       this.videoCallParams.peer.signal(this.videoCallParams.callerSignal);
 
-      this.startTimer(); // Start the timer after accepting the call
+      this.startTimer(); // Start the timer after setting up the call
+    },
+    declineCall() {
+      this.videoCallParams.receivingCall = false;
+      axios.post("/video/decline-call", {
+        to: this.videoCallParams.caller,
+      });
+      this.log("Declined the call");
+      console.log("Declined the call");
     },
     startTimer() {
-      if (this.time_limit <= 0) {
-        console.error("Invalid time limit. Ending call immediately.");
-        this.endCall();
-        return;
-      }
-
       this.timeLeft = this.time_limit;
-      console.log(`Timer started with ${this.timeLeft} seconds`);
       this.timerInterval = setInterval(() => {
         if (this.timeLeft > 0) {
           this.timeLeft -= 1;
-          console.log(`Time left: ${this.timeLeft} seconds`);
         } else {
-          console.log("Time is up. Ending call.");
           this.endCall();
         }
       }, 1000);
@@ -366,90 +388,72 @@ export default {
       const secs = seconds % 60;
       return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
     },
-    toggleCameraArea() {
-      if (this.videoCallParams.callAccepted) {
-        this.isFocusMyself = !this.isFocusMyself;
-      }
-    },
-    declineCall() {
-      this.videoCallParams.receivingCall = false;
-    },
-    toggleMuteAudio() {
-      if (this.$refs.userVideo && this.$refs.userVideo.srcObject) {
-        const audioTracks = this.$refs.userVideo.srcObject.getAudioTracks();
-        if (audioTracks.length > 0) {
-          audioTracks[0].enabled = !this.mutedAudio;
-          this.mutedAudio = !this.mutedAudio;
-        }
-      }
-    },
-    toggleMuteVideo() {
-      if (this.$refs.userVideo && this.$refs.userVideo.srcObject) {
-        const videoTracks = this.$refs.userVideo.srcObject.getVideoTracks();
-        if (videoTracks.length > 0) {
-          videoTracks[0].enabled = !this.mutedVideo;
-          this.mutedVideo = !this.mutedVideo;
-        }
-      }
-    },
-    log(message) {
-      this.logs.push(message);
-    },
-    logWebRTCStats() {
-      const peerConnection = this.videoCallParams.peer;
-
-      if (peerConnection) {
-        peerConnection
-          .getStats(null)
-          .then((stats) => {
-            stats.forEach((report) => {
-              // Example of logging ping time (you need to find the correct metric)
-              if (
-                report.type === "candidate-pair" &&
-                report.remoteCandidateType === "relay"
-              ) {
-                this.log(`Ping speed: ${report.currentRoundTripTime}ms`);
-              }
-              // Log other relevant WebRTC stats
-              this.log(`WebRTC Stats: ${JSON.stringify(report)}`);
-            });
-          })
-          .catch((error) => {
-            console.error("Error getting WebRTC stats:", error);
-          });
-      } else {
-        this.log("Peer connection not available.");
-      }
-    },
     endCall() {
-      this.videoCallParams.callAccepted = false;
-      this.callPlaced = false;
-      this.callPartner = null;
-      this.showVideoWindow = false;
-      this.timeLeft = 0;
-      clearInterval(this.timerInterval);
-
-      if (this.videoCallParams.stream) {
-        this.videoCallParams.stream.getTracks().forEach((track) => {
-          track.stop();
-        });
-      }
-
       if (this.videoCallParams.peer) {
         this.videoCallParams.peer.destroy();
       }
-
-      this.videoCallParams.peer = null;
-
-      this.playCallEndSound();
+      clearInterval(this.timerInterval);
+      this.showVideoWindow = false;
+      this.callPlaced = false;
+      this.videoCallParams.callAccepted = false;
+      this.videoCallParams.receivingCall = false;
+      this.callPartner = null;
+      this.videoCallParams.stream.getTracks().forEach((track) => track.stop());
+      this.videoCallParams.stream = null;
+      this.playEndCallSound();
+      this.log("Call ended");
+      console.log("Call ended");
+    },
+    toggleMuteAudio() {
+      this.mutedAudio = !this.mutedAudio;
+      this.videoCallParams.stream.getAudioTracks().forEach((track) => {
+        track.enabled = !this.mutedAudio;
+      });
+      this.log(`Audio ${this.mutedAudio ? "muted" : "unmuted"}`);
+      console.log(`Audio ${this.mutedAudio ? "muted" : "unmuted"}`);
+    },
+    toggleMuteVideo() {
+      this.mutedVideo = !this.mutedVideo;
+      this.videoCallParams.stream.getVideoTracks().forEach((track) => {
+        track.enabled = !this.mutedVideo;
+      });
+      this.log(`Video ${this.mutedVideo ? "hidden" : "shown"}`);
+      console.log(`Video ${this.mutedVideo ? "hidden" : "shown"}`);
+    },
+    toggleCameraArea() {
+      this.isFocusMyself = !this.isFocusMyself;
     },
     playIncomingCallSound() {
-      const audio = new Audio("../audio/incoming-call.mp3");
-      audio.play();
+      const audio = new Audio("/sounds/incoming-call.mp3");
+      audio.play().catch((error) => {
+        console.error("Error playing sound:", error);
+      });
+      this.log("Playing incoming call sound");
+      console.log("Playing incoming call sound");
     },
-    playCallEndSound() {
-      const audio = new Audio("../audio/call-end.mp3");
-      audio.play();
+    playEndCallSound() {
+      const audio = new Audio("/sounds/call-ended.mp3");
+      audio.play().catch((error) => {
+        console.error("Error playing sound:", error);
+      });
+      console.log("Playing incoming call sound");
+    },
+    startPingTest() {
+      this.pingInterval = setInterval(() => {
+        const start = Date.now();
+        this.videoCallParams.peer.send("ping");
+        this.videoCallParams.peer.on("data", (data) => {
+          if (data.toString() === "ping") {
+            const ping = Date.now() - start;
+            this.log(`Ping speed: ${ping} ms`);
+            console.log(`Ping speed: ${ping} ms`);
+          }
+        });
+      }, 10000); // Ping every 10 seconds
+    },
+    log(message) {
+      this.logs.push(message);
+      console.log("Log message:", message);
     },
   },
 };
@@ -508,6 +512,23 @@ export default {
   z-index: 3;
   display: flex;
   flex-direction: row;
+}
+
+.logs {
+  margin-top: 20px;
+}
+
+.logs ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.logs li {
+  margin-bottom: 5px;
+  font-size: 14px;
+  background-color: #f0f0f0;
+  padding: 5px;
+  border-radius: 5px;
 }
 
 /* Mobile Styles */

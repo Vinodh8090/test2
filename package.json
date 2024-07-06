@@ -40,7 +40,7 @@
     "vue": "^2.5.17",
     "vue-template-compiler": "^2.6.10",
     "wow.js": "^1.2.2",
-    "xss": "^1.0.14"
+    "xss": "^1.0.15"
   },
   "devDependencies": {
     "@laylazi/bootstrap-rtl-scss": "^4.6.2-1",

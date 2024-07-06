@@ -22,6 +22,7 @@ use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Javascript;
 use Pusher\Pusher;
@@ -56,6 +57,8 @@ class MessengerController extends Controller
         }
 
         $availableContacts = $this->getUserSearch($request);
+
+
 
         Javascript::put([
             'messengerVars' => [
@@ -92,11 +95,13 @@ class MessengerController extends Controller
             ],
         ]);
 
+
         $unseenMessages = UserMessage::where('receiver_id', Auth::user()->id)->where('isSeen', 0)->count();
         $data = [
             'lastContactID' => $lastContactID,
             'unseenMessages' => $unseenMessages,
             'availableContacts' => $availableContacts,
+            'recipient_id' => $lastContactID,
             'user_id' => Auth::user()->id,
 
         ];
